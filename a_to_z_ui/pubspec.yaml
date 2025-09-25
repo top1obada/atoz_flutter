@@ -16,6 +16,7 @@ dependencies:
   a_to_z_widgets:
     path: ../a_to_z_widgets
   audioplayers: ^6.5.1
+  shared_preferences: ^2.5.3
   my_widgets:
     path: ../my_widgets
   a_to_z_providers:

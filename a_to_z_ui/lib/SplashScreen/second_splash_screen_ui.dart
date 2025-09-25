@@ -1,9 +1,11 @@
+import 'package:a_to_z_providers/BasesProviders/base_current_login_info_provider.dart';
 import 'package:a_to_z_providers/LoginProviders/customer_login_by_username_provider.dart';
 import 'package:a_to_z_ui/CustomerLoginUI/customer_login_ui.dart';
+import 'package:a_to_z_ui/CustomerMainMenuUI/customer_main_menu_ui.dart';
 import 'package:a_to_z_ui/MusicUI/music_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:a_to_z_providers/RefreshTokenProviders/refresh_token_provider.dart';
 import 'dart:math';
-
 import 'package:provider/provider.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -38,17 +40,50 @@ class _SplashScreenState extends State<SplashScreen>
     _controller.forward();
 
     // === ADD THIS LISTENER FOR THE EVENT AFTER ANIMATION COMPLETES ===
-    _controller.addStatusListener((status) {
+    _controller.addStatusListener((status) async {
       if (status == AnimationStatus.completed && !_hasNavigated) {
         _hasNavigated = true;
-        _executeAfterAnimation();
+        await _executeAfterAnimation();
       }
     });
   }
 
   // === ADD THIS METHOD FOR YOUR EVENT ===
-  void _executeAfterAnimation() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+  Future<void> _executeAfterAnimation() async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      PVRefreshToken refreshToken = PVRefreshToken();
+
+      var result = await refreshToken.login();
+
+      if (result) {
+        PVBaseCurrentLoginInfo currentLoginInfo = refreshToken;
+        Navigator.pushReplacement(
+          context,
+
+          MaterialPageRoute(
+            builder: (con) {
+              return MultiProvider(
+                providers: [
+                  ChangeNotifierProvider.value(value: currentLoginInfo),
+                  ChangeNotifierProvider(
+                    create: (_) {
+                      var pv = PVSong();
+                      pv.start();
+                      return pv;
+                    },
+                  ),
+                  ChangeNotifierProvider(
+                    create: (_) => PVMainMenuUiPagesProvider(),
+                  ),
+                ],
+                child: const CustomerMainMenuUi(),
+              );
+            },
+          ),
+        );
+        return;
+      }
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(

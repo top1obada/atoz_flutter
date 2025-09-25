@@ -58,98 +58,105 @@ class _StoreCategoriesScreenState extends State<StoreCategoriesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Selector<PVShowRequest, int>(
-            selector: (con, provider) => provider.itemsCount,
-            builder:
-                (con, value, child) =>
-                // Header with badge
-                StoreHeaderWithBadge(
-                  title: 'فئات ${widget.storeName}',
-                  itemCount: value,
-                  icon: Icons.shopping_cart,
-                  onIconPressed:
-                      value > 0
-                          ? () => OpenScreens.onCartIconPressed(
-                            context,
-                            widget.storeName,
-                            widget.storeID,
-                          )
-                          : null,
-                ),
-          ),
-          const SizedBox(height: 8),
-
-          Expanded(
-            child: Consumer<PVStoreCategories>(
-              builder: (con, provider, child) {
-                return CardsTemplate(
-                  scrollController: _scrollController,
-                  isLoaded: provider.isLoaded,
-                  isFinished: provider.isFinished,
-                  values: provider.storeCategories,
-                  lineLength: 2,
-                  widgetGetter: GetStoreCategoryWidget(),
-                  onCardClick: (c) {
-                    ClsCategoryDto storeCategoryDto = c as ClsCategoryDto;
-
-                    if (storeCategoryDto.categoryID == null) {
-                      return;
-                    }
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (con) => MultiProvider(
-                              providers: [
-                                ChangeNotifierProvider.value(
-                                  value:
-                                      context
-                                          .read<PVStoreCategorySubCategories>(),
-                                ),
-                                ChangeNotifierProvider.value(
-                                  value:
-                                      context
-                                          .read<PVStoreSubCategoryItemItems>(),
-                                ),
-                                ChangeNotifierProvider.value(
-                                  value:
-                                      context
-                                          .read<
-                                            PVStoreSubCategorySubCategoryItems
-                                          >(),
-                                ),
-                                ChangeNotifierProvider.value(
-                                  value: context.read<PVBaseCurrentLoginInfo>(),
-                                ),
-                                ChangeNotifierProvider.value(
-                                  value: context.read<PVShowRequest>(),
-                                ),
-                              ],
-                              child: StoreCategorySubCategoriesScreen(
-                                storeID: widget.storeID,
-                                categoryID: storeCategoryDto.categoryID!,
-                                storeName: widget.storeName,
-                                categoryName: storeCategoryDto.categoryName!,
-                              ),
-                            ),
-                      ),
-                    ).then(
-                      (c) =>
-                          context
-                              .read<PVStoreCategorySubCategories>()
-                              .initToLoad(),
-                    );
-                  },
-                );
-              },
+    return SafeArea(
+      child: Scaffold(
+        body: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Selector<PVShowRequest, int>(
+              selector: (con, provider) => provider.itemsCount,
+              builder:
+                  (con, value, child) =>
+                  // Header with badge
+                  StoreHeaderWithBadge(
+                    title: 'فئات ${widget.storeName}',
+                    itemCount: value,
+                    icon: Icons.shopping_cart,
+                    onIconPressed:
+                        value > 0
+                            ? () => OpenScreens.onCartIconPressed(
+                              context,
+                              widget.storeName,
+                              widget.storeID,
+                            )
+                            : null,
+                  ),
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+
+            Expanded(
+              child: Consumer<PVStoreCategories>(
+                builder: (con, provider, child) {
+                  return CardsTemplate(
+                    scrollController: _scrollController,
+                    isLoaded: provider.isLoaded,
+                    isFinished: provider.isFinished,
+                    values: provider.storeCategories,
+                    lineLength: 2,
+                    widgetGetter: GetStoreCategoryWidget(),
+                    onCardClick: (c) {
+                      ClsCategoryDto storeCategoryDto = c as ClsCategoryDto;
+
+                      if (storeCategoryDto.categoryID == null) {
+                        return;
+                      }
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (con) => MultiProvider(
+                                providers: [
+                                  ChangeNotifierProvider.value(
+                                    value:
+                                        context
+                                            .read<
+                                              PVStoreCategorySubCategories
+                                            >(),
+                                  ),
+                                  ChangeNotifierProvider.value(
+                                    value:
+                                        context
+                                            .read<
+                                              PVStoreSubCategoryItemItems
+                                            >(),
+                                  ),
+                                  ChangeNotifierProvider.value(
+                                    value:
+                                        context
+                                            .read<
+                                              PVStoreSubCategorySubCategoryItems
+                                            >(),
+                                  ),
+                                  ChangeNotifierProvider.value(
+                                    value:
+                                        context.read<PVBaseCurrentLoginInfo>(),
+                                  ),
+                                  ChangeNotifierProvider.value(
+                                    value: context.read<PVShowRequest>(),
+                                  ),
+                                ],
+                                child: StoreCategorySubCategoriesScreen(
+                                  storeID: widget.storeID,
+                                  categoryID: storeCategoryDto.categoryID!,
+                                  storeName: widget.storeName,
+                                  categoryName: storeCategoryDto.categoryName!,
+                                ),
+                              ),
+                        ),
+                      ).then(
+                        (c) =>
+                            context
+                                .read<PVStoreCategorySubCategories>()
+                                .initToLoad(),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

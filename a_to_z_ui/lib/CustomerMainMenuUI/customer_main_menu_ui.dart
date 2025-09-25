@@ -66,84 +66,85 @@ class _CustomerMinMenuUi extends State<CustomerMainMenuUi> {
 
   @override
   Widget build(BuildContext context) {
-    return BaseScaffold(
-      title: 'A TO Z',
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Consumer<PVMainMenuUiPagesProvider>(
-            builder: (context, value, child) {
-              if (value.page == EnMainMenuPages.eSearchCustomerStores) {
-                return Expanded(
-                  child: MultiProvider(
-                    providers: [
-                      ChangeNotifierProvider(
-                        create: (_) => PVCustomerSearchStores(),
-                      ),
-                      ChangeNotifierProvider(
-                        create: (_) => PVCustomerPreviousRequestsStores(),
-                      ),
-                      ChangeNotifierProvider.value(
-                        value: context.read<PVBaseCurrentLoginInfo>(),
-                      ),
-                      ChangeNotifierProvider(create: (_) => PVSearch()),
-                    ],
-                    child: const SearchCustomerStoresUi(),
-                  ),
-                );
-              }
-              if (value.page == EnMainMenuPages.eCustomerFavoriteStores) {
-                return Expanded(
-                  child: MultiProvider(
-                    providers: [
-                      ChangeNotifierProvider(
-                        create: (_) => PVCustomerFavoriteStores(),
-                      ),
-                      ChangeNotifierProvider.value(
-                        value: context.read<PVBaseCurrentLoginInfo>(),
-                      ),
-                    ],
-                    child: const CustomerFavoriteStoresUi(),
-                  ),
-                );
-              }
+    return SafeArea(
+      child: BaseScaffold(
+        title: 'A TO Z',
+        body: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Consumer<PVMainMenuUiPagesProvider>(
+              builder: (context, value, child) {
+                if (value.page == EnMainMenuPages.eSearchCustomerStores) {
+                  return Expanded(
+                    child: MultiProvider(
+                      providers: [
+                        ChangeNotifierProvider(
+                          create: (_) => PVCustomerSearchStores(),
+                        ),
+                        ChangeNotifierProvider(
+                          create: (_) => PVCustomerPreviousRequestsStores(),
+                        ),
+                        ChangeNotifierProvider.value(
+                          value: context.read<PVBaseCurrentLoginInfo>(),
+                        ),
+                        ChangeNotifierProvider(create: (_) => PVSearch()),
+                      ],
+                      child: const SearchCustomerStoresUi(),
+                    ),
+                  );
+                }
+                if (value.page == EnMainMenuPages.eCustomerFavoriteStores) {
+                  return Expanded(
+                    child: MultiProvider(
+                      providers: [
+                        ChangeNotifierProvider(
+                          create: (_) => PVCustomerFavoriteStores(),
+                        ),
+                        ChangeNotifierProvider.value(
+                          value: context.read<PVBaseCurrentLoginInfo>(),
+                        ),
+                      ],
+                      child: const CustomerFavoriteStoresUi(),
+                    ),
+                  );
+                }
 
-              if (value.page == EnMainMenuPages.eCustomerFamousStores) {
+                if (value.page == EnMainMenuPages.eCustomerFamousStores) {
+                  return Expanded(
+                    child: MultiProvider(
+                      providers: [
+                        ChangeNotifierProvider(
+                          create: (_) => PVCustomerFamousStores(),
+                        ),
+                        ChangeNotifierProvider.value(
+                          value: context.read<PVBaseCurrentLoginInfo>(),
+                        ),
+                      ],
+                      child: const CustomerFamousStoresUi(),
+                    ),
+                  );
+                }
                 return Expanded(
                   child: MultiProvider(
                     providers: [
                       ChangeNotifierProvider(
-                        create: (_) => PVCustomerFamousStores(),
+                        create: (_) => PVCustomerStoresSuggestions(),
                       ),
                       ChangeNotifierProvider.value(
                         value: context.read<PVBaseCurrentLoginInfo>(),
                       ),
+                      ChangeNotifierProvider(
+                        create: (_) => PVStoreTypesWithColors(),
+                      ),
                     ],
-                    child: const CustomerFamousStoresUi(),
+                    child: const CustomerStoresSuggestionsUi(),
                   ),
                 );
-              }
-              return Expanded(
-                child: MultiProvider(
-                  providers: [
-                    ChangeNotifierProvider(
-                      create: (_) => PVCustomerStoresSuggestions(),
-                    ),
-                    ChangeNotifierProvider.value(
-                      value: context.read<PVBaseCurrentLoginInfo>(),
-                    ),
-                    ChangeNotifierProvider(
-                      create: (_) => PVStoreTypesWithColors(),
-                    ),
-                  ],
-                  child: const CustomerStoresSuggestionsUi(),
-                ),
-              );
-            },
-          ),
-
-          const BottomLineMainMenu(),
-        ],
+              },
+            ),
+            const BottomLineMainMenu(),
+          ],
+        ),
       ),
     );
   }

@@ -116,319 +116,323 @@ class _RequestContentUi extends State<RequestContentUi> {
   Widget build(BuildContext context) {
     PVShowRequest showRequest = context.read<PVShowRequest>();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'تفاصيل الطلب',
-          style: TextStyle(
-            fontFamily: 'Tajawal',
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
+    return SafeArea(
+      // ← ADD THIS
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            'تفاصيل الطلب',
+            style: TextStyle(
+              fontFamily: 'Tajawal',
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
           ),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.blue[700],
-        foregroundColor: Colors.white,
-        elevation: 4,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
-        ),
-        // Add customer balance button in app bar
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.account_balance_wallet, color: Colors.white),
-            onPressed: _showCustomerBalanceDialog,
-            tooltip: 'استخدام رصيد العميل',
+          centerTitle: true,
+          backgroundColor: Colors.blue[700],
+          foregroundColor: Colors.white,
+          elevation: 4,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
           ),
-        ],
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.blue[50]!, Colors.grey[100]!],
-          ),
+          actions: [
+            IconButton(
+              icon: const Icon(
+                Icons.account_balance_wallet,
+                color: Colors.white,
+              ),
+              onPressed: _showCustomerBalanceDialog,
+              tooltip: 'استخدام رصيد العميل',
+            ),
+          ],
         ),
-        child: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            // Request Summary Card (scrollable)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Selector<PVRequest, int?>(
-                  selector: (con, provider) => provider.requestID,
-                  builder:
-                      (context, value, child) => Consumer<PVShowRequest>(
-                        builder:
-                            (context, showpv, child) => WDNewRequestCard(
-                              newRequest: ClsNewRequest(
-                                storeName: showpv.requestShow!.storeName,
-                                requestDate: DateTime.now(),
-                                requestStatus: EnRequestStatus.ePending,
-                                totalPrice: showpv.totalDue,
-                                discounts: showpv.discount,
-                                customerbalancedUsed:
-                                    showpv.requestShow!.balanceUsedVaue,
-                                requestID: value,
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.blue[50]!, Colors.grey[100]!],
+            ),
+          ),
+          child: CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Selector<PVRequest, int?>(
+                    selector: (con, provider) => provider.requestID,
+                    builder:
+                        (context, value, child) => Consumer<PVShowRequest>(
+                          builder:
+                              (context, showpv, child) => WDNewRequestCard(
+                                newRequest: ClsNewRequest(
+                                  storeName: showpv.requestShow!.storeName,
+                                  requestDate: DateTime.now(),
+                                  requestStatus: EnRequestStatus.ePending,
+                                  totalPrice: showpv.totalDue,
+                                  discounts: showpv.discount,
+                                  customerbalancedUsed:
+                                      showpv.requestShow!.balanceUsedVaue,
+                                  requestID: value,
+                                ),
+                                onCardClicked: null,
                               ),
-                              onCardClicked: null,
-                            ),
-                      ),
-                ),
-              ),
-            ),
-
-            // Customer Balance Button Section
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 8,
-                ),
-                child: ElevatedButton.icon(
-                  onPressed: _showCustomerBalanceDialog,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[50],
-                    foregroundColor: Colors.blue[800],
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 16,
-                      horizontal: 20,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      side: BorderSide(color: Colors.blue[300]!, width: 1),
-                    ),
-                    elevation: 2,
-                  ),
-                  icon: const Icon(Icons.account_balance_wallet, size: 24),
-                  label: const Text(
-                    'استخدام رصيد العميل',
-                    style: TextStyle(
-                      fontFamily: 'Tajawal',
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                        ),
                   ),
                 ),
               ),
-            ),
 
-            // Items Header
-            SliverToBoxAdapter(
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.blue.withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                  border: Border.all(color: Colors.blue[100]!, width: 1),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'المنتجات (${showRequest.itemsCount})',
-                      style: const TextStyle(
-                        fontFamily: 'Tajawal',
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
+                  child: ElevatedButton.icon(
+                    onPressed: _showCustomerBalanceDialog,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue[50],
+                      foregroundColor: Colors.blue[800],
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 20,
                       ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: BorderSide(color: Colors.blue[300]!, width: 1),
+                      ),
+                      elevation: 2,
                     ),
-                    Text(
-                      '${showRequest.totalDue.toStringAsFixed(2)} ليرة سورية',
+                    icon: const Icon(Icons.account_balance_wallet, size: 24),
+                    label: const Text(
+                      'استخدام رصيد العميل',
                       style: TextStyle(
                         fontFamily: 'Tajawal',
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green[700],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
 
-            // Items Grid using CardsTemplate wrapped in SliverToBoxAdapter
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height:
-                    MediaQuery.of(context).size.height -
-                    300, // Adjust height as needed
-                child: Consumer<PVRequest>(
-                  builder:
-                      (con, pvrequest, child) => CardsTemplate(
-                        scrollController: ScrollController(),
-                        isLoaded: true,
-                        isFinished: true,
-                        values:
-                            showRequest.requestShow!.storeSubCategoryItemItems,
-                        lineLength: 2,
-                        widgetGetter: GetStoreSubCategoryItemItemShowWidget(),
-                        onCardClick:
-                            (pvrequest.isLoading || pvrequest.requestID != null)
-                                ? null
-                                : _onRemoveItem,
-                        showEndSection: false,
+              SliverToBoxAdapter(
+                child: Container(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.withValues(alpha: 0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
+                    ],
+                    border: Border.all(color: Colors.blue[100]!, width: 1),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'المنتجات (${showRequest.itemsCount})',
+                        style: const TextStyle(
+                          fontFamily: 'Tajawal',
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      Text(
+                        '${showRequest.totalDue.toStringAsFixed(2)} ليرة سورية',
+                        style: TextStyle(
+                          fontFamily: 'Tajawal',
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green[700],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            // Add some bottom padding
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 80), // Space for bottom button
-            ),
-          ],
-        ),
-      ),
-      // Beautiful Arabic-style bottom button
-      bottomNavigationBar: Container(
-        height: 80,
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -2),
-            ),
-          ],
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
+              // FIXED HEIGHT CALCULATION
+              SliverToBoxAdapter(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: 200,
+                    maxHeight: MediaQuery.of(context).size.height * 0.6,
+                  ),
+                  child: Consumer<PVRequest>(
+                    builder:
+                        (con, pvrequest, child) => CardsTemplate(
+                          scrollController: ScrollController(),
+                          isLoaded: true,
+                          isFinished: true,
+                          values:
+                              showRequest
+                                  .requestShow!
+                                  .storeSubCategoryItemItems,
+                          lineLength: 2,
+                          widgetGetter: GetStoreSubCategoryItemItemShowWidget(),
+                          onCardClick:
+                              (pvrequest.isLoading ||
+                                      pvrequest.requestID != null)
+                                  ? null
+                                  : _onRemoveItem,
+                          showEndSection: false,
+                        ),
+                  ),
+                ),
+              ),
+
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 20), // Reduced padding
+              ),
+            ],
           ),
         ),
-        child: Selector<PVRequest, bool>(
-          selector: (context, provider) => provider.isLoading,
-          builder: (context, isLoading, child) {
-            final currentProvider = context.read<PVRequest>();
+        bottomNavigationBar: Container(
+          height: 80,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(20),
+              topRight: Radius.circular(20),
+            ),
+          ),
+          child: Selector<PVRequest, bool>(
+            selector: (context, provider) => provider.isLoading,
+            builder: (context, isLoading, child) {
+              final currentProvider = context.read<PVRequest>();
 
-            // Loading state
-            if (isLoading) {
-              return Container(
-                padding: const EdgeInsets.symmetric(vertical: 8),
+              if (isLoading) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                      ),
+                      SizedBox(width: 12),
+                      Text(
+                        'جاري تأكيد الطلب...',
+                        style: TextStyle(
+                          fontFamily: 'Tajawal',
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              if (currentProvider.requestID != null) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.check_circle,
+                        color: Colors.green[700],
+                        size: 24,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'تم تأكيد الطلب بنجاح',
+                        style: TextStyle(
+                          fontFamily: 'Tajawal',
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green[700],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              if (currentProvider.isLoaded &&
+                  currentProvider.requestID == null) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.error, color: Colors.red[700], size: 24),
+                      const SizedBox(width: 8),
+                      Text(
+                        'فشل في تأكيد الطلب',
+                        style: TextStyle(
+                          fontFamily: 'Tajawal',
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red[700],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                  ),
+                );
+              }
+
+              return ElevatedButton(
+                onPressed: () async {
+                  currentProvider.putItems(
+                    showRequest.requestShow!.storeSubCategoryItemItems!,
+                  );
+
+                  await currentProvider.request();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue[700],
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                    horizontal: 32,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 4,
+                  shadowColor: Colors.blue.withValues(alpha: 0.3),
+                ),
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                    ),
-                    SizedBox(width: 12),
+                    Icon(Icons.send, size: 20, color: Colors.white),
+                    SizedBox(width: 8),
                     Text(
-                      'جاري تأكيد الطلب...',
-                      style: TextStyle(
-                        fontFamily: 'Tajawal',
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            // Success state
-            if (currentProvider.requestID != null) {
-              return Container(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.check_circle,
-                      color: Colors.green[700],
-                      size: 24,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'تم تأكيد الطلب بنجاح',
+                      'تأكيد الطلب',
                       style: TextStyle(
                         fontFamily: 'Tajawal',
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green[700],
                       ),
                     ),
                   ],
                 ),
               );
-            }
-
-            // Error state
-            if (currentProvider.isLoaded && currentProvider.requestID == null) {
-              return Container(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.error, color: Colors.red[700], size: 24),
-                    const SizedBox(width: 8),
-                    Text(
-                      'فشل في تأكيد الطلب',
-                      style: TextStyle(
-                        fontFamily: 'Tajawal',
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red[700],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                ),
-              );
-            }
-
-            // Default state - Confirm order button
-            return ElevatedButton(
-              onPressed: () async {
-                currentProvider.putItems(
-                  showRequest.requestShow!.storeSubCategoryItemItems!,
-                );
-
-                await currentProvider.request();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue[700],
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  vertical: 16,
-                  horizontal: 32,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 4,
-                shadowColor: Colors.blue.withValues(alpha: 0.3),
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.send, size: 20, color: Colors.white),
-                  SizedBox(width: 8),
-                  Text(
-                    'تأكيد الطلب',
-                    style: TextStyle(
-                      fontFamily: 'Tajawal',
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
+            },
+          ),
         ),
       ),
     );

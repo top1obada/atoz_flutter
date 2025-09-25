@@ -4,9 +4,9 @@ import 'package:a_to_z_dto/LocationDTO/user_point_dto.dart';
 import 'package:a_to_z_dto/LoginDTO/native_login_info_dto.dart';
 import 'package:a_to_z_providers/BasesProviders/base_current_login_info_provider.dart';
 import 'package:a_to_z_providers/Global/errors.dart';
-import 'package:a_to_z_providers/Global/save_login_info.dart';
 import 'package:a_to_z_providers/LocationProviders/get_current_location_provider.dart';
 import 'package:a_to_z_providers/StaticLibraries/jwt_token_helper.dart';
+import 'package:a_to_z_providers/BasesProviders/SecureStorage/secure_storage.dart';
 
 class PVCustomerLoginByUsername extends PVBaseCurrentLoginInfo {
   Future<bool> login(ClsNativeLoginInfoDTO nativeLoginInfoDTO) async {
@@ -36,10 +36,7 @@ class PVCustomerLoginByUsername extends PVBaseCurrentLoginInfo {
           right.jwtToken!,
         );
 
-        await SaveLoginInfo.writeSaveLoginInfo(
-          right.jwtToken!,
-          right.refreshToken!,
-        );
+        await StorageService.save(right.jwtToken!, right.refreshToken!);
 
         DioClient.initOnRequest();
 

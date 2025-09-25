@@ -68,103 +68,108 @@ class _StoreCategorySubCategoriesScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Header with badge
-          Selector<PVShowRequest, int>(
-            selector: (context, provider) => provider.itemsCount,
-            builder:
-                (context, value, child) => StoreHeaderWithBadge(
-                  title: '${widget.categoryName} - ${widget.storeName}',
-                  itemCount: value,
-                  icon: Icons.shopping_cart,
-                  onIconPressed:
-                      value > 0
-                          ? () => OpenScreens.onCartIconPressed(
-                            context,
-                            widget.storeName,
-                            widget.storeID,
-                          )
-                          : null,
-                ),
-          ),
-          const SizedBox(height: 8),
-
-          Expanded(
-            child: Consumer<PVStoreCategorySubCategories>(
-              builder: (con, provider, child) {
-                return CardsTemplate(
-                  scrollController: _scrollController,
-                  isLoaded: provider.isLoaded,
-                  isFinished: provider.isFinished,
-                  values:
-                      provider.storeSubCategories == null
-                          ? null
-                          : provider.storeSubCategories!
-                              .where((c) => c.categoryID == widget.categoryID)
-                              .toList(),
-                  lineLength: 2,
-                  widgetGetter: GetStoreSubCategoryWidget(),
-                  onCardClick: (c) {
-                    ClsSubCategoryDTO storeSubCategoryDto =
-                        c as ClsSubCategoryDTO;
-
-                    if (storeSubCategoryDto.subCategoryID == null) {
-                      return;
-                    }
-
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder:
-                            (con) => MultiProvider(
-                              providers: [
-                                ChangeNotifierProvider.value(
-                                  value:
-                                      context
-                                          .read<
-                                            PVStoreSubCategorySubCategoryItems
-                                          >(),
-                                ),
-                                ChangeNotifierProvider.value(
-                                  value:
-                                      context
-                                          .read<PVStoreSubCategoryItemItems>(),
-                                ),
-                                ChangeNotifierProvider.value(
-                                  value: context.read<PVBaseCurrentLoginInfo>(),
-                                ),
-                                ChangeNotifierProvider.value(
-                                  value: context.read<PVShowRequest>(),
-                                ),
-                              ],
-
-                              child: StoreSubCategoryItemsScreen(
-                                storeID: widget.storeID,
-                                categoryID: widget.categoryID,
-                                storeName: widget.storeName,
-                                categoryName: widget.categoryName,
-                                subCategoryID:
-                                    storeSubCategoryDto.subCategoryID!,
-                                subCategoryName:
-                                    storeSubCategoryDto.subCategoryName!,
-                              ),
-                            ),
-                      ),
-                    ).then(
-                      (c) =>
-                          context
-                              .read<PVStoreSubCategorySubCategoryItems>()
-                              .initToLoad(),
-                    );
-                  },
-                );
-              },
+    return SafeArea(
+      child: Scaffold(
+        body: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header with badge
+            Selector<PVShowRequest, int>(
+              selector: (context, provider) => provider.itemsCount,
+              builder:
+                  (context, value, child) => StoreHeaderWithBadge(
+                    title: '${widget.categoryName} - ${widget.storeName}',
+                    itemCount: value,
+                    icon: Icons.shopping_cart,
+                    onIconPressed:
+                        value > 0
+                            ? () => OpenScreens.onCartIconPressed(
+                              context,
+                              widget.storeName,
+                              widget.storeID,
+                            )
+                            : null,
+                  ),
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+
+            Expanded(
+              child: Consumer<PVStoreCategorySubCategories>(
+                builder: (con, provider, child) {
+                  return CardsTemplate(
+                    scrollController: _scrollController,
+                    isLoaded: provider.isLoaded,
+                    isFinished: provider.isFinished,
+                    values:
+                        provider.storeSubCategories == null
+                            ? null
+                            : provider.storeSubCategories!
+                                .where((c) => c.categoryID == widget.categoryID)
+                                .toList(),
+                    lineLength: 2,
+                    widgetGetter: GetStoreSubCategoryWidget(),
+                    onCardClick: (c) {
+                      ClsSubCategoryDTO storeSubCategoryDto =
+                          c as ClsSubCategoryDTO;
+
+                      if (storeSubCategoryDto.subCategoryID == null) {
+                        return;
+                      }
+
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (con) => MultiProvider(
+                                providers: [
+                                  ChangeNotifierProvider.value(
+                                    value:
+                                        context
+                                            .read<
+                                              PVStoreSubCategorySubCategoryItems
+                                            >(),
+                                  ),
+                                  ChangeNotifierProvider.value(
+                                    value:
+                                        context
+                                            .read<
+                                              PVStoreSubCategoryItemItems
+                                            >(),
+                                  ),
+                                  ChangeNotifierProvider.value(
+                                    value:
+                                        context.read<PVBaseCurrentLoginInfo>(),
+                                  ),
+                                  ChangeNotifierProvider.value(
+                                    value: context.read<PVShowRequest>(),
+                                  ),
+                                ],
+
+                                child: StoreSubCategoryItemsScreen(
+                                  storeID: widget.storeID,
+                                  categoryID: widget.categoryID,
+                                  storeName: widget.storeName,
+                                  categoryName: widget.categoryName,
+                                  subCategoryID:
+                                      storeSubCategoryDto.subCategoryID!,
+                                  subCategoryName:
+                                      storeSubCategoryDto.subCategoryName!,
+                                ),
+                              ),
+                        ),
+                      ).then(
+                        (c) =>
+                            context
+                                .read<PVStoreSubCategorySubCategoryItems>()
+                                .initToLoad(),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

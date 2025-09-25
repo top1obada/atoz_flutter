@@ -50,7 +50,10 @@ class _CustomerLoginScreenUIState extends State<CustomerLoginScreenUI> {
 
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
-      var result = await context.read<PVCustomerLoginByUsername>().login(
+      // Get the provider instance
+      final loginProvider = context.read<PVCustomerLoginByUsername>();
+
+      var result = await loginProvider.login(
         ClsNativeLoginInfoDTO(
           userName: usernameController.text,
           password: passwordController.text,
@@ -60,20 +63,23 @@ class _CustomerLoginScreenUIState extends State<CustomerLoginScreenUI> {
       if (!mounted) return;
 
       if (result) {
-        PVBaseCurrentLoginInfo currentLogin =
-            context.read<PVCustomerLoginByUsername>();
-
+        PVBaseCurrentLoginInfo currentLogin = loginProvider;
         PVBaseCurrentLoginInfo pvbaseCurrentLoginInfo = currentLogin;
 
-        Navigator.push(
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
             builder:
                 (innerContext) => MultiProvider(
                   providers: [
-                    ChangeNotifierProvider(create: (_) => PVSong()),
+                    ChangeNotifierProvider(
+                      create: (_) {
+                        var pv = PVSong();
+                        pv.start();
+                        return pv;
+                      },
+                    ),
                     ChangeNotifierProvider.value(value: pvbaseCurrentLoginInfo),
-
                     ChangeNotifierProvider(
                       create: (c) => PVMainMenuUiPagesProvider(),
                     ),
@@ -81,10 +87,11 @@ class _CustomerLoginScreenUIState extends State<CustomerLoginScreenUI> {
                   child: const CustomerMainMenuUi(),
                 ),
           ),
+          (Route<dynamic> rr) => false,
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('اسم المستخدم أو كلمة المرور غير صحيحة'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
@@ -108,17 +115,17 @@ class _CustomerLoginScreenUIState extends State<CustomerLoginScreenUI> {
                 // Header Section
                 SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                 _buildLogoSection(),
-                SizedBox(height: 40),
+                const SizedBox(height: 40),
 
                 // Login Form
                 _buildLoginForm(),
 
                 // Social Login Section - Only Google
-                SizedBox(height: 30),
+                const SizedBox(height: 30),
                 _buildGoogleLoginSection(),
 
                 // Footer
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 _buildFooter(),
               ],
             ),
@@ -131,9 +138,9 @@ class _CustomerLoginScreenUIState extends State<CustomerLoginScreenUI> {
   Widget _buildLogoSection() {
     final currentColor = _colorCycle[_colorIndex];
     final currentColorWithOpacity = Color.fromRGBO(
-      currentColor.r.toInt(), // Convert to int
-      currentColor.g.toInt(), // Convert to int
-      currentColor.b.toInt(), // Convert to int
+      currentColor.red,
+      currentColor.green,
+      currentColor.blue,
       0.3,
     );
 
@@ -156,7 +163,7 @@ class _CustomerLoginScreenUIState extends State<CustomerLoginScreenUI> {
                 ),
               ],
             ),
-            child: Center(
+            child: const Center(
               child: Text(
                 'A To Z',
                 style: TextStyle(
@@ -168,7 +175,7 @@ class _CustomerLoginScreenUIState extends State<CustomerLoginScreenUI> {
             ),
           ),
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         Text(
           'مرحباً بعودتك!',
           style: TextStyle(
@@ -177,7 +184,7 @@ class _CustomerLoginScreenUIState extends State<CustomerLoginScreenUI> {
             color: Colors.blue[900],
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Text(
           'سجل الدخول إلى حسابك للمتابعة',
           style: TextStyle(fontSize: 16, color: Colors.grey[600]),
@@ -212,7 +219,7 @@ class _CustomerLoginScreenUIState extends State<CustomerLoginScreenUI> {
               textDirection: TextDirection.rtl,
               textAlign: TextAlign.right,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Password Field
             WDNativePasswordTextFormField(
@@ -220,7 +227,7 @@ class _CustomerLoginScreenUIState extends State<CustomerLoginScreenUI> {
               hintText: 'كلمة المرور',
               textDirection: TextDirection.rtl,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
 
             // Forgot Password
             Align(
@@ -233,27 +240,62 @@ class _CustomerLoginScreenUIState extends State<CustomerLoginScreenUI> {
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-            // Login Button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _login,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[900],
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+            // Login Button with Loading State
+            Consumer<PVCustomerLoginByUsername>(
+              builder: (context, loginProvider, child) {
+                return SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: loginProvider.isLoading ? null : _login,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          loginProvider.isLoading
+                              ? Colors.grey[400]
+                              : Colors.blue[900],
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 3,
+                    ),
+                    child:
+                        loginProvider.isLoading
+                            ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Text(
+                                  'جاري التسجيل...',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            )
+                            : const Text(
+                              'تسجيل الدخول',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                   ),
-                  elevation: 3,
-                ),
-                child: Text(
-                  'تسجيل الدخول',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
+                );
+              },
             ),
           ],
         ),
@@ -270,7 +312,7 @@ class _CustomerLoginScreenUIState extends State<CustomerLoginScreenUI> {
           'أو سجل الدخول باستخدام',
           style: TextStyle(color: Colors.grey[600], fontSize: 14),
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16),
         _buildGoogleButton(blackWithOpacity),
       ],
     );
@@ -288,7 +330,7 @@ class _CustomerLoginScreenUIState extends State<CustomerLoginScreenUI> {
         ],
       ),
       child: IconButton(
-        icon: Icon(Icons.g_mobiledata, color: Colors.red, size: 24),
+        icon: const Icon(Icons.g_mobiledata, color: Colors.red, size: 24),
         onPressed: () {},
       ),
     );
@@ -303,7 +345,6 @@ class _CustomerLoginScreenUIState extends State<CustomerLoginScreenUI> {
           onPressed: () {
             Navigator.push(
               context,
-
               MaterialPageRoute(
                 builder:
                     (conext) => MultiProvider(

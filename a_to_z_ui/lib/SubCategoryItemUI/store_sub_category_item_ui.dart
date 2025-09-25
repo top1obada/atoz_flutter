@@ -97,54 +97,57 @@ class _StoreSubCategoryItemsScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Selector<PVShowRequest, int>(
-            selector: (context, provider) => provider.itemsCount,
-            builder:
-                (context, value, child) =>
-                // Header with badge
-                StoreHeaderWithBadge(
-                  title: '${widget.subCategoryName} - ${widget.storeName}',
-                  itemCount: value,
-                  icon: Icons.shopping_cart,
-                  onIconPressed:
-                      value > 0
-                          ? () => OpenScreens.onCartIconPressed(
-                            context,
-                            widget.storeName,
-                            widget.storeID,
-                          )
-                          : null,
-                ),
-          ),
-          const SizedBox(height: 8),
-
-          Expanded(
-            child: Consumer<PVStoreSubCategorySubCategoryItems>(
-              builder: (con, provider, child) {
-                return CardsTemplate(
-                  scrollController: _scrollController,
-                  isLoaded: provider.isLoaded,
-                  isFinished: provider.isFinished,
-                  values:
-                      provider.storeSubCategoryItems == null
-                          ? null
-                          : provider.storeSubCategoryItems!
-                              .where(
-                                (c) => c.subCategoryID == widget.subCategoryID,
-                              )
-                              .toList(),
-                  lineLength: 2,
-                  widgetGetter: GetStoreSubCategoryItemWidget(),
-                  onCardClick: _onSubCategoryItemClick,
-                );
-              },
+    return SafeArea(
+      child: Scaffold(
+        body: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Selector<PVShowRequest, int>(
+              selector: (context, provider) => provider.itemsCount,
+              builder:
+                  (context, value, child) =>
+                  // Header with badge
+                  StoreHeaderWithBadge(
+                    title: '${widget.subCategoryName} - ${widget.storeName}',
+                    itemCount: value,
+                    icon: Icons.shopping_cart,
+                    onIconPressed:
+                        value > 0
+                            ? () => OpenScreens.onCartIconPressed(
+                              context,
+                              widget.storeName,
+                              widget.storeID,
+                            )
+                            : null,
+                  ),
             ),
-          ),
-        ],
+            const SizedBox(height: 8),
+
+            Expanded(
+              child: Consumer<PVStoreSubCategorySubCategoryItems>(
+                builder: (con, provider, child) {
+                  return CardsTemplate(
+                    scrollController: _scrollController,
+                    isLoaded: provider.isLoaded,
+                    isFinished: provider.isFinished,
+                    values:
+                        provider.storeSubCategoryItems == null
+                            ? null
+                            : provider.storeSubCategoryItems!
+                                .where(
+                                  (c) =>
+                                      c.subCategoryID == widget.subCategoryID,
+                                )
+                                .toList(),
+                    lineLength: 2,
+                    widgetGetter: GetStoreSubCategoryItemWidget(),
+                    onCardClick: _onSubCategoryItemClick,
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
