@@ -9,6 +9,10 @@ import 'package:a_to_z_ui/CustomerLoginUI/customer_login_ui.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  final session = await AudioSession.instance;
+
+  await session.configure(const AudioSessionConfiguration.music());
+
   runApp(MaterialApp(home: const SplashScreen()));
 }
 
