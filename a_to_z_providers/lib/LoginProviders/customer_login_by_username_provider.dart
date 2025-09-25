@@ -9,8 +9,21 @@ import 'package:a_to_z_providers/StaticLibraries/jwt_token_helper.dart';
 import 'package:a_to_z_providers/BasesProviders/SecureStorage/secure_storage.dart';
 
 class PVCustomerLoginByUsername extends PVBaseCurrentLoginInfo {
+  bool _isLoading = false;
+
+  bool get isLoading {
+    return _isLoading;
+  }
+
   Future<bool> login(ClsNativeLoginInfoDTO nativeLoginInfoDTO) async {
+    if (_isLoading) {
+      return false;
+    }
     Errors.errorMessage = null;
+
+    _isLoading = true;
+
+    notifyListeners();
 
     ClsUserPointDTO? userPointDTO =
         await PVCurrentLocation().getCurrentLocation();
@@ -24,6 +37,7 @@ class PVCustomerLoginByUsername extends PVBaseCurrentLoginInfo {
       userPointDTO,
     );
 
+    _isLoading = false;
     // Use fold with proper async handling
     return await result.fold(
       (left) async {

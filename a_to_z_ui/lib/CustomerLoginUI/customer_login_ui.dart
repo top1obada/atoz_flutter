@@ -138,9 +138,9 @@ class _CustomerLoginScreenUIState extends State<CustomerLoginScreenUI> {
   Widget _buildLogoSection() {
     final currentColor = _colorCycle[_colorIndex];
     final currentColorWithOpacity = Color.fromRGBO(
-      currentColor.red,
-      currentColor.green,
-      currentColor.blue,
+      currentColor.r.toInt(), // Convert to int
+      currentColor.g.toInt(), // Convert to int
+      currentColor.b.toInt(), // Convert to int
       0.3,
     );
 

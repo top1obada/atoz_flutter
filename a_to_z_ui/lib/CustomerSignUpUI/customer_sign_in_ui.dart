@@ -4,6 +4,7 @@ import 'package:a_to_z_dto/PersonDTO/person_dto.dart';
 import 'package:a_to_z_providers/BasesProviders/base_current_login_info_provider.dart';
 import 'package:a_to_z_providers/SignUpProviders/customer_sign_uo_by_username_provider.dart';
 import 'package:a_to_z_ui/CustomerMainMenuUI/customer_main_menu_ui.dart';
+import 'package:a_to_z_ui/MusicUI/music_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:my_widgets/CountriesWidgets/countries_drop_down_list_widget.dart';
 import 'package:my_widgets/DateTimeWidgets/wd_date_time.dart';
@@ -46,6 +47,9 @@ class _UICustomerSignUp extends State<UICustomerSignUp> {
   Future<void> _signUp() async {
     if (!_formKey.currentState!.validate()) return;
 
+    // Get the provider instance
+    final signUpProvider = context.read<PVCustomerSignUoByUsername>();
+
     ClsSignUpCustomerByUserNameDTO signUpCustomerByUserNameDTO =
         ClsSignUpCustomerByUserNameDTO(
           person: ClsPersonDTO(
@@ -61,39 +65,39 @@ class _UICustomerSignUp extends State<UICustomerSignUp> {
           ),
         );
 
-    PVCustomerSignUoByUsername pvCustomerSignUoByUsername =
-        context.read<PVCustomerSignUoByUsername>();
-
-    final result = await pvCustomerSignUoByUsername.signUp(
-      signUpCustomerByUserNameDTO,
-    );
+    final result = await signUpProvider.signUp(signUpCustomerByUserNameDTO);
 
     if (!mounted) return;
 
     if (!result) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('فشل تسجيل الدخول'),
+        const SnackBar(
+          content: Text('فشل في إنشاء الحساب'),
           backgroundColor: Colors.red,
-          duration: Duration(seconds: 1),
+          duration: Duration(seconds: 2),
         ),
       );
       return;
     }
 
-    PVBaseCurrentLoginInfo pvbaseCurrentLoginInfo = pvCustomerSignUoByUsername;
+    PVBaseCurrentLoginInfo pvbaseCurrentLoginInfo = signUpProvider;
 
-    Navigator.push(
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
         builder:
             (innerContext) => MultiProvider(
               providers: [
+                ChangeNotifierProvider(create: (_) => PVSong()),
                 ChangeNotifierProvider.value(value: pvbaseCurrentLoginInfo),
+                ChangeNotifierProvider(
+                  create: (_) => PVMainMenuUiPagesProvider(),
+                ),
               ],
               child: const CustomerMainMenuUi(),
             ),
       ),
+      (Route<dynamic> rr) => false,
     );
   }
 
@@ -128,7 +132,10 @@ class _UICustomerSignUp extends State<UICustomerSignUp> {
                   // Personal Information Section
                   Text(
                     'المعلومات الشخصية',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 10),
 
@@ -188,7 +195,10 @@ class _UICustomerSignUp extends State<UICustomerSignUp> {
                   // Account Credentials Section
                   Text(
                     'بيانات الحساب',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 10),
 
@@ -225,20 +235,58 @@ class _UICustomerSignUp extends State<UICustomerSignUp> {
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20),
-            child: SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: _signUp,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[700],
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+            child: Consumer<PVCustomerSignUoByUsername>(
+              builder: (context, signUpProvider, child) {
+                return SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: signUpProvider.isLoading ? null : _signUp,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          signUpProvider.isLoading
+                              ? Colors.grey[400]
+                              : Colors.blue[700],
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child:
+                        signUpProvider.isLoading
+                            ? Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                const Text(
+                                  'جاري إنشاء الحساب...',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            )
+                            : const Text(
+                              'تسجيل',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                   ),
-                ),
-                child: const Text('تسجيل'),
-              ),
+                );
+              },
             ),
           ),
         ),

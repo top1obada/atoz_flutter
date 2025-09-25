@@ -51,8 +51,7 @@ class _CustomerFamousStoresUi extends State<CustomerFamousStoresUi> {
                 .retrivingLoggedInDTO!
                 .branchID,
         pageSize: 6,
-        distanceInMeters:
-            kmProvider!.distanceInKm * 1000, // تحويل الكيلومتر إلى متر
+        distanceInMeters: kmProvider!.distanceInKm * 1000,
       ),
     );
   }
