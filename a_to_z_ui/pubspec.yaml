@@ -15,7 +15,7 @@ dependencies:
   provider: ^6.1.2
   a_to_z_widgets:
     path: ../a_to_z_widgets
-  just_audio: ^0.10.5
+  audioplayers: ^6.5.1
   my_widgets:
     path: ../my_widgets
   a_to_z_providers:

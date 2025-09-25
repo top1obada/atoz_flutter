@@ -1,24 +1,38 @@
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
-
+import 'package:audioplayers/audioplayers.dart';
 import 'package:provider/provider.dart';
 
 class PVSong extends ChangeNotifier {
   final AudioPlayer _player = AudioPlayer();
+  bool _isPlaying = false;
 
-  bool _istarted = false;
-
-  void start() {}
+  bool get isPlaying => _isPlaying;
 
   Future<void> play(String song) async {
     await _player.stop();
-    await _player.setAsset(song);
-
-    await _player.play();
+    await _player.play(AssetSource(song.replaceFirst('assets/', '')));
+    _isPlaying = true;
+    notifyListeners();
   }
 
-  void stop() {
-    _player.stop();
+  Future<void> stop() async {
+    await _player.stop();
+    _isPlaying = false;
+    notifyListeners();
+  }
+
+  Future<void> toggle(String song) async {
+    if (_isPlaying) {
+      await stop();
+    } else {
+      await play(song);
+    }
+  }
+
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
   }
 }
 
@@ -30,39 +44,25 @@ class MusicRadioPage extends StatefulWidget {
 }
 
 class _MusicRadioPageState extends State<MusicRadioPage> {
-  String _selectedSong = 'dubai_song.mp3';
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  Future<void> _playSong() async {
-    await context.read<PVSong>().play('assets/$_selectedSong');
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
+  String _selectedSong = 'assets/dubai_song.mp3';
 
   @override
   Widget build(BuildContext context) {
+    final songProvider = context.watch<PVSong>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("اختيار أغنية"),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Column(
         children: [
           RadioListTile<String>(
             title: const Text("Dubai Song"),
-            value: 'dubai_song.mp3',
+            value: 'assets/dubai_song.mp3',
             groupValue: _selectedSong,
             onChanged: (value) {
               setState(() {
@@ -71,7 +71,10 @@ class _MusicRadioPageState extends State<MusicRadioPage> {
             },
           ),
           const SizedBox(height: 20),
-          ElevatedButton(onPressed: _playSong, child: const Text("تشغيل")),
+          ElevatedButton(
+            onPressed: () => songProvider.toggle(_selectedSong),
+            child: Text(songProvider.isPlaying ? "إيقاف" : "تشغيل"),
+          ),
         ],
       ),
     );

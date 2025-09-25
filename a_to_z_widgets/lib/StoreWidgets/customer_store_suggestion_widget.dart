@@ -59,6 +59,8 @@ class _WDStoreSuggestionCardState extends State<WDStoreSuggestionCard> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Store Image - Fills entire width
+                _buildStoreImage(isSmallDevice, isLargeDevice),
+
                 const SizedBox(height: 6),
 
                 // Store Name - Centered
