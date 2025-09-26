@@ -35,13 +35,14 @@ jobs:
         run: flutter pub get
         working-directory: a_to_z_ui
 
-      # 👇 خطوة مهمة لتوليد الأيقونات
+      # 👇 خطوة توليد الأيقونات
       - name: Generate app icons
         run: flutter pub run flutter_launcher_icons
         working-directory: a_to_z_ui
 
+      # 👇 خطوة البناء مع تعطيل tree shake للأيقونات
       - name: Build APK
-        run: flutter build apk --release
+        run: flutter build apk --release --no-tree-shake-icons
         working-directory: a_to_z_ui
 
       - name: Upload APK
