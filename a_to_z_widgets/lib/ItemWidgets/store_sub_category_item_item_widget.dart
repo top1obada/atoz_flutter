@@ -143,7 +143,7 @@ class _WDStoreSubCategoryItemItemCardState
 
                         // Item Name
                         Text(
-                          widget.storeItemDTO.description ?? 'منتج غير معروف',
+                          widget.storeItemDTO.notes ?? 'منتج غير معروف',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: isSmallDevice ? 19 : 24,
@@ -201,10 +201,10 @@ class _WDStoreSubCategoryItemItemCardState
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child:
-            widget.storeItemDTO.itemImage != null &&
-                    widget.storeItemDTO.itemImage!.isNotEmpty
+            widget.storeItemDTO.imagepath != null &&
+                    widget.storeItemDTO.imagepath!.isNotEmpty
                 ? CloudinaryImage(
-                  imageUrl: widget.storeItemDTO.itemImage!,
+                  imageUrl: widget.storeItemDTO.imagepath!,
                   imageHeight: imageHeight,
                 )
                 : _buildPlaceholderIcon(imageHeight),
@@ -365,11 +365,11 @@ class _WDStoreSubCategoryItemItemCardState
                 // Create a copy with the current count
                 final itemToAdd = ClsStoreSubCategoryItemItemDTO(
                   storeItemID: widget.storeItemDTO.storeItemID,
-                  itemID: widget.storeItemDTO.itemID,
+
                   price: widget.storeItemDTO.price,
                   count: onCountProvider.currentCount,
-                  description: widget.storeItemDTO.description,
-                  itemImage: widget.storeItemDTO.itemImage,
+                  notes: widget.storeItemDTO.notes,
+                  imagepath: widget.storeItemDTO.imagepath,
                   subCategoryItemTypeName:
                       widget.storeItemDTO.subCategoryItemTypeName,
                   priceAfterDiscount: widget.storeItemDTO.priceAfterDiscount,

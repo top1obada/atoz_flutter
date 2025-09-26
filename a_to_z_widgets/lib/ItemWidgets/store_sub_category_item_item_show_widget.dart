@@ -97,7 +97,7 @@ class _WDStoreSubCategoryItemItemCardShowState
 
               // Item Name
               Text(
-                widget.storeItemDTO.description ?? 'منتج غير معروف',
+                widget.storeItemDTO.notes ?? 'منتج غير معروف',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: isSmallDevice ? 19 : 24,
@@ -142,10 +142,10 @@ class _WDStoreSubCategoryItemItemCardShowState
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child:
-            widget.storeItemDTO.itemImage != null &&
-                    widget.storeItemDTO.itemImage!.isNotEmpty
+            widget.storeItemDTO.imagepath != null &&
+                    widget.storeItemDTO.imagepath!.isNotEmpty
                 ? CloudinaryImage(
-                  imageUrl: widget.storeItemDTO.itemImage!,
+                  imageUrl: widget.storeItemDTO.imagepath!,
                   imageHeight: imageHeight,
                 )
                 : _buildPlaceholderIcon(imageHeight),
