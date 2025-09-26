@@ -2,13 +2,13 @@ class ClsStoreTypeWithColorDto {
   String? storeTypeName;
   String? hexCode;
   int? shade;
-  int? codePoint; // Added codePoint field
+  String? codePoint; // Changed from int? to String?
 
   ClsStoreTypeWithColorDto({
     this.storeTypeName,
     this.hexCode,
     this.shade,
-    this.codePoint, // Added to constructor
+    this.codePoint,
   });
 
   factory ClsStoreTypeWithColorDto.fromJson(Map<String, dynamic> json) {
@@ -16,7 +16,7 @@ class ClsStoreTypeWithColorDto {
       storeTypeName: json['StoreTypeName'] as String?,
       hexCode: json['HexCode'] as String?,
       shade: json['Shade'] as int?,
-      codePoint: json['CodePoint'] as int?, // Added from JSON
+      codePoint: json['CodePoint'] as String?, // Updated to String
     );
   }
 
@@ -25,7 +25,7 @@ class ClsStoreTypeWithColorDto {
       'StoreTypeName': storeTypeName,
       'HexCode': hexCode,
       'Shade': shade,
-      'CodePoint': codePoint, // Added to JSON
+      'CodePoint': codePoint,
     };
   }
 }

@@ -1,13 +1,11 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 class WordItem {
   final String text;
   final Color color;
-  final int? iconCodePoint; // Added iconCodePoint to WordItem
-
-  WordItem(this.text, this.color, {this.iconCodePoint});
+  final String? iconName;
+  WordItem(this.text, this.color, {this.iconName});
 }
 
 class TextSelectorLine extends StatefulWidget {
@@ -42,6 +40,32 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
   bool _isCooldown = false;
   Timer? _cooldownTimer;
 
+  final Map<String, IconData> _iconMap = {
+    'phone_iphone': Icons.phone_iphone,
+    'checkroom': Icons.checkroom,
+    'local_grocery_store': Icons.local_grocery_store,
+    'restaurant': Icons.restaurant,
+    'local_cafe': Icons.local_cafe,
+    'chair': Icons.chair,
+    'spa': Icons.spa,
+    'sports_soccer': Icons.sports_soccer,
+    'child_friendly': Icons.child_friendly,
+    'menu_book': Icons.menu_book,
+    'directions_car': Icons.directions_car,
+    'pets': Icons.pets,
+    'card_giftcard': Icons.card_giftcard,
+    'kitchen': Icons.kitchen,
+    'watch': Icons.watch,
+    'watch_outlined': Icons.watch_outlined,
+    'sports_esports': Icons.sports_esports,
+    'handyman': Icons.handyman,
+    'miscellaneous_services': Icons.miscellaneous_services,
+    'computer': Icons.computer,
+    'music_note': Icons.music_note,
+    'home_repair_service': Icons.home_repair_service,
+    'local_pharmacy': Icons.local_pharmacy,
+  };
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -50,15 +74,10 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
   }
 
   void _startCooldown() {
-    setState(() {
-      _isCooldown = true;
-    });
-
+    setState(() => _isCooldown = true);
     _cooldownTimer?.cancel();
     _cooldownTimer = Timer(Duration(milliseconds: widget.cooldownDuration), () {
-      setState(() {
-        _isCooldown = false;
-      });
+      setState(() => _isCooldown = false);
     });
   }
 
@@ -67,7 +86,6 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double scrollPosition =
         (index * itemWidth) - (screenWidth / 2) + (itemWidth / 2);
-
     _scrollController.animateTo(
       scrollPosition.clamp(0.0, _scrollController.position.maxScrollExtent),
       duration: const Duration(milliseconds: 500),
@@ -75,36 +93,14 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
     );
   }
 
-  Color _withOpacity(Color color, double opacity) {
-    return color.withAlpha((color.a * opacity).round());
-  }
-
-  // Function to convert code point to icon
-  IconData _codePointToIcon(
-    int? codePoint, {
-    IconData fallbackIcon = Icons.help_outline,
-  }) {
-    if (codePoint == null) return fallbackIcon;
-
-    try {
-      return IconData(codePoint, fontFamily: 'MaterialIcons');
-    } catch (e) {
-      print('Error converting code point $codePoint to icon: $e');
-      return fallbackIcon;
-    }
-  }
-
-  // Function to build the content (text or icon) based on selection state
-  Widget _buildContent(WordItem wordItem, bool isSelected, bool isCooldown) {
-    if (isSelected && wordItem.iconCodePoint != null) {
-      // Show icon when selected and has code point
+  Widget _buildContent(WordItem wordItem, bool isSelected) {
+    if (isSelected && wordItem.iconName != null) {
       return Icon(
-        _codePointToIcon(wordItem.iconCodePoint),
+        _iconMap[wordItem.iconName] ?? Icons.help_outline,
         size: isSelected ? widget.selectedFontSize : widget.defaultFontSize,
         color: isSelected ? wordItem.color : widget.defaultColor,
       );
     } else {
-      // Show text when not selected or no icon code point
       return Text(
         wordItem.text,
         style: TextStyle(
@@ -141,7 +137,6 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
         margin: const EdgeInsets.all(8),
         child: Column(
           children: [
-            // Cooldown indicator
             if (_isCooldown && _selectedIndex != -1)
               Container(
                 margin: const EdgeInsets.only(bottom: 8),
@@ -154,8 +149,6 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-
-            // Main content
             IgnorePointer(
               ignoring: _isCooldown,
               child: Opacity(
@@ -168,11 +161,9 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
                     children: List.generate(widget.wordItems.length, (index) {
                       final isSelected = index == _selectedIndex;
                       final wordItem = widget.wordItems[index];
-
                       return GestureDetector(
                         onTap: () {
                           setState(() {
-                            // If clicking the same item, toggle selection
                             if (_selectedIndex == index) {
                               _selectedIndex = -1;
                             } else {
@@ -194,7 +185,7 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
                           decoration: BoxDecoration(
                             color:
                                 isSelected
-                                    ? _withOpacity(wordItem.color, 0.2)
+                                    ? wordItem.color.withOpacity(0.2)
                                     : Colors.transparent,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
@@ -208,10 +199,7 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // Main content (text or icon)
-                              _buildContent(wordItem, isSelected, _isCooldown),
-
-                              // Cooldown indicator on the selected item
+                              _buildContent(wordItem, isSelected),
                               if (isSelected && _isCooldown)
                                 Padding(
                                   padding: const EdgeInsets.only(left: 8),

@@ -42,7 +42,7 @@ class StoresTypesLineWithColors extends StatelessWidget {
         return WordItem(
           storeType.storeTypeName ?? 'غير معروف',
           color,
-          iconCodePoint: storeType.codePoint, // Pass the code point from DTO
+          iconName: storeType.codePoint, // Pass the icon name from DTO
         );
       }),
     ];

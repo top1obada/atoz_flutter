@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:a_to_z_ui/CustomerBalanceUI/customer_balance_payments_history_and_customer_balance_ui.dart';
 import 'package:a_to_z_providers/AddressProviders/add_address_provider.dart';
+import 'package:a_to_z_providers/SessionProviders/drop_session_provider.dart';
 
 class BaseDrawer extends StatelessWidget {
   const BaseDrawer({super.key});
@@ -203,7 +204,12 @@ class BaseDrawer extends StatelessWidget {
                   textDirection: TextDirection.rtl,
                 ),
                 onTap: () async {
-                  await context.read<PVBaseCurrentLoginInfo>().clear();
+                  final dropProvider = PVDropSessionProvider();
+
+                  var result = await dropProvider.drop();
+
+                  if (!result) return;
+
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
