@@ -11,7 +11,6 @@ class StoresTypesLineWithColors extends StatelessWidget {
   });
 
   final List<ClsStoreTypeWithColorDto>? storesTypesWithColors;
-
   final Function(String) onItemClick;
 
   @override
@@ -34,13 +33,17 @@ class StoresTypesLineWithColors extends StatelessWidget {
 
     // Convert DTOs to WordItems and add "All" as first item
     final List<WordItem> wordItems = [
-      WordItem('الكل', Colors.grey), // Add "All" with grey color as first item
+      WordItem('الكل', Colors.grey), // "All" item without icon
       ...storesTypesWithColors!.map((storeType) {
         final Color color = ColorService.parseColor(
           storeType.hexCode,
           storeType.shade,
         );
-        return WordItem(storeType.storeTypeName ?? 'غير معروف', color);
+        return WordItem(
+          storeType.storeTypeName ?? 'غير معروف',
+          color,
+          iconCodePoint: storeType.codePoint, // Pass the code point from DTO
+        );
       }),
     ];
 

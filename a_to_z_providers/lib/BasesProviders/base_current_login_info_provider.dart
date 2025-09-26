@@ -6,8 +6,8 @@ import 'package:a_to_z_providers/BasesProviders/SecureStorage/secure_storage.dar
 class PVBaseCurrentLoginInfo extends ChangeNotifier {
   ClsRetrivingLoggedInDTO? retrivingLoggedInDTO;
 
-  void clear() {
+  Future<void> clear() async {
     retrivingLoggedInDTO = null;
-    StorageService.clear();
+    await StorageService.clear();
   }
 }

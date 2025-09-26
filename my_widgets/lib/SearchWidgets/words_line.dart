@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 class WordItem {
   final String text;
   final Color color;
+  final int? iconCodePoint; // Added iconCodePoint to WordItem
 
-  WordItem(this.text, this.color);
+  WordItem(this.text, this.color, {this.iconCodePoint});
 }
 
 class TextSelectorLine extends StatefulWidget {
@@ -17,7 +18,7 @@ class TextSelectorLine extends StatefulWidget {
   final double defaultFontSize;
   final double selectedFontSize;
   final bool showBackground;
-  final int cooldownDuration; // Cooldown duration in milliseconds
+  final int cooldownDuration;
 
   const TextSelectorLine({
     super.key,
@@ -28,7 +29,7 @@ class TextSelectorLine extends StatefulWidget {
     this.defaultFontSize = 16.0,
     this.selectedFontSize = 20.0,
     this.showBackground = true,
-    this.cooldownDuration = 2000, // Default 2 seconds
+    this.cooldownDuration = 2000,
   });
 
   @override
@@ -44,7 +45,7 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
   @override
   void dispose() {
     _scrollController.dispose();
-    _cooldownTimer?.cancel(); // Cancel any active timer
+    _cooldownTimer?.cancel();
     super.dispose();
   }
 
@@ -53,10 +54,7 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
       _isCooldown = true;
     });
 
-    // Cancel any existing timer
     _cooldownTimer?.cancel();
-
-    // Start new cooldown timer
     _cooldownTimer = Timer(Duration(milliseconds: widget.cooldownDuration), () {
       setState(() {
         _isCooldown = false;
@@ -65,8 +63,7 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
   }
 
   void _scrollToSelectedItem(int index) {
-    // Calculate the position to scroll to
-    final double itemWidth = 100; // Approximate width of each item
+    final double itemWidth = 100;
     final double screenWidth = MediaQuery.of(context).size.width;
     final double scrollPosition =
         (index * itemWidth) - (screenWidth / 2) + (itemWidth / 2);
@@ -78,9 +75,47 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
     );
   }
 
-  // Helper method to create a color with opacity
   Color _withOpacity(Color color, double opacity) {
     return color.withAlpha((color.a * opacity).round());
+  }
+
+  // Function to convert code point to icon
+  IconData _codePointToIcon(
+    int? codePoint, {
+    IconData fallbackIcon = Icons.help_outline,
+  }) {
+    if (codePoint == null) return fallbackIcon;
+
+    try {
+      return IconData(codePoint, fontFamily: 'MaterialIcons');
+    } catch (e) {
+      print('Error converting code point $codePoint to icon: $e');
+      return fallbackIcon;
+    }
+  }
+
+  // Function to build the content (text or icon) based on selection state
+  Widget _buildContent(WordItem wordItem, bool isSelected, bool isCooldown) {
+    if (isSelected && wordItem.iconCodePoint != null) {
+      // Show icon when selected and has code point
+      return Icon(
+        _codePointToIcon(wordItem.iconCodePoint),
+        size: isSelected ? widget.selectedFontSize : widget.defaultFontSize,
+        color: isSelected ? wordItem.color : widget.defaultColor,
+      );
+    } else {
+      // Show text when not selected or no icon code point
+      return Text(
+        wordItem.text,
+        style: TextStyle(
+          fontSize:
+              isSelected ? widget.selectedFontSize : widget.defaultFontSize,
+          color: isSelected ? wordItem.color : widget.defaultColor,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          fontFamily: 'NotoNaskhArabic',
+        ),
+      );
+    }
   }
 
   @override
@@ -106,7 +141,7 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
         margin: const EdgeInsets.all(8),
         child: Column(
           children: [
-            // Cooldown indicator (optional visual feedback)
+            // Cooldown indicator
             if (_isCooldown && _selectedIndex != -1)
               Container(
                 margin: const EdgeInsets.only(bottom: 8),
@@ -119,7 +154,8 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-            // Disable entire widget during cooldown
+
+            // Main content
             IgnorePointer(
               ignoring: _isCooldown,
               child: Opacity(
@@ -136,13 +172,16 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
                       return GestureDetector(
                         onTap: () {
                           setState(() {
-                            _selectedIndex = index;
+                            // If clicking the same item, toggle selection
+                            if (_selectedIndex == index) {
+                              _selectedIndex = -1;
+                            } else {
+                              _selectedIndex = index;
+                              _scrollToSelectedItem(index);
+                              widget.onWordSelected(wordItem.text);
+                              _startCooldown();
+                            }
                           });
-                          _scrollToSelectedItem(index);
-                          widget.onWordSelected(wordItem.text);
-
-                          // Start cooldown timer
-                          _startCooldown();
                         },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
@@ -155,10 +194,7 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
                           decoration: BoxDecoration(
                             color:
                                 isSelected
-                                    ? _withOpacity(
-                                      wordItem.color,
-                                      0.2,
-                                    ) // Using the helper method
+                                    ? _withOpacity(wordItem.color, 0.2)
                                     : Colors.transparent,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
@@ -172,24 +208,9 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
-                                wordItem.text,
-                                style: TextStyle(
-                                  fontSize:
-                                      isSelected
-                                          ? widget.selectedFontSize
-                                          : widget.defaultFontSize,
-                                  color:
-                                      isSelected
-                                          ? wordItem.color
-                                          : widget.defaultColor,
-                                  fontWeight:
-                                      isSelected
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                  fontFamily: 'NotoNaskhArabic',
-                                ),
-                              ),
+                              // Main content (text or icon)
+                              _buildContent(wordItem, isSelected, _isCooldown),
+
                               // Cooldown indicator on the selected item
                               if (isSelected && _isCooldown)
                                 Padding(

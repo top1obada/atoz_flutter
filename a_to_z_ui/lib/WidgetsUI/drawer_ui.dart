@@ -202,13 +202,14 @@ class BaseDrawer extends StatelessWidget {
                   'تسجيل الخروج',
                   textDirection: TextDirection.rtl,
                 ),
-                onTap: () {
+                onTap: () async {
+                  await context.read<PVBaseCurrentLoginInfo>().clear();
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(
                       builder:
-                          (con) => ChangeNotifierProvider.value(
-                            value: context.read<PVCustomerLoginByUsername>(),
+                          (con) => ChangeNotifierProvider(
+                            create: (_) => PVCustomerLoginByUsername(),
                             child: const CustomerLoginScreenUI(),
                           ),
                     ),

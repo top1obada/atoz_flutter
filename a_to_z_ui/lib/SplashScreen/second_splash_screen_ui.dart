@@ -19,9 +19,12 @@ class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
-  bool _hasNavigated = false; // Prevent multiple navigations
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _rotationAnimation;
+  late Animation<Offset> _slideAnimation;
+  bool _hasNavigated = false;
 
-  String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  final List<String> _letters = ['A', 'TO', 'Z'];
 
   @override
   void initState() {
@@ -29,17 +32,40 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 8),
+      duration: const Duration(seconds: 6),
     );
 
     _fadeAnimation = CurvedAnimation(
       parent: _controller,
-      curve: Curves.easeInOutCubic,
+      curve: const Interval(0.0, 0.8, curve: Curves.easeInOutCubic),
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.2, 1.0, curve: Curves.elasticOut),
+      ),
+    );
+
+    _rotationAnimation = Tween<double>(begin: 2 * pi, end: 0.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.1, 0.7, curve: Curves.easeOutBack),
+      ),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 2.0),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.3, 0.9, curve: Curves.easeOutCubic),
+      ),
     );
 
     _controller.forward();
 
-    // === ADD THIS LISTENER FOR THE EVENT AFTER ANIMATION COMPLETES ===
     _controller.addStatusListener((status) async {
       if (status == AnimationStatus.completed && !_hasNavigated) {
         _hasNavigated = true;
@@ -48,7 +74,6 @@ class _SplashScreenState extends State<SplashScreen>
     });
   }
 
-  // === ADD THIS METHOD FOR YOUR EVENT ===
   Future<void> _executeAfterAnimation() async {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       PVRefreshToken refreshToken = PVRefreshToken();
@@ -59,7 +84,6 @@ class _SplashScreenState extends State<SplashScreen>
         PVBaseCurrentLoginInfo currentLoginInfo = refreshToken;
         Navigator.pushReplacement(
           context,
-
           MaterialPageRoute(
             builder: (con) {
               return MultiProvider(
@@ -107,6 +131,90 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
+  Widget _buildLetter(String letter, int index) {
+    double delay = index * 0.2;
+    double letterProgress = max(0.0, (_controller.value - delay) / 0.6);
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        double wave = sin(letterProgress * pi * 4 + index) * 0.1;
+        double scale = 0.8 + letterProgress * 0.4;
+        double rotation = sin(letterProgress * pi * 2) * 0.1;
+
+        return Transform(
+          transform:
+              Matrix4.identity()
+                ..scale(scale + wave)
+                ..rotateZ(rotation),
+          alignment: Alignment.center,
+          child: Opacity(
+            opacity: letterProgress.clamp(0.0, 1.0),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.amber.shade300,
+                    Colors.orange.shade400,
+                    Colors.deepOrange.shade400,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.amber.withValues(alpha: 0.6),
+                    blurRadius: 20,
+                    spreadRadius: 3,
+                    offset: const Offset(0, 5),
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.4),
+                    blurRadius: 15,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Text(
+                letter,
+                style: TextStyle(
+                  fontSize: letter == 'TO' ? 28 : 42,
+                  fontWeight: FontWeight.bold,
+                  foreground:
+                      Paint()
+                        ..shader = LinearGradient(
+                          colors: [
+                            Colors.white,
+                            Colors.amber.shade100,
+                            Colors.white,
+                          ],
+                          stops: const [0.0, 0.5, 1.0],
+                        ).createShader(const Rect.fromLTWH(0, 0, 200, 70)),
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withValues(alpha: 0.7),
+                      blurRadius: 12,
+                      offset: const Offset(3, 3),
+                    ),
+                    Shadow(
+                      color: Colors.orange.withValues(alpha: 0.4),
+                      blurRadius: 10,
+                      offset: const Offset(-2, -2),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,11 +222,8 @@ class _SplashScreenState extends State<SplashScreen>
         width: double.infinity,
         height: double.infinity,
         child: AnimatedBuilder(
-          animation: _fadeAnimation,
+          animation: _controller,
           builder: (context, child) {
-            int lettersToShow =
-                (alphabet.length * _fadeAnimation.value).floor();
-
             return Container(
               width: double.infinity,
               height: double.infinity,
@@ -143,7 +248,7 @@ class _SplashScreenState extends State<SplashScreen>
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  stops: [0.0, 0.5, 1.0],
+                  stops: const [0.0, 0.5, 1.0],
                 ),
               ),
               child: SafeArea(
@@ -152,141 +257,79 @@ class _SplashScreenState extends State<SplashScreen>
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     // Enhanced icon with golden border effect
-                    Container(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.amber.shade300,
-                            Colors.orange.shade400,
-                            Colors.deepOrange.shade400,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.amber.withValues(alpha: 0.6),
-                            blurRadius: 20,
-                            spreadRadius: 3,
-                            offset: const Offset(0, 5),
-                          ),
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.4),
-                            blurRadius: 15,
-                            spreadRadius: 2,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.all(8),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.3),
-                              blurRadius: 10,
-                              offset: const Offset(0, 3),
+                    ScaleTransition(
+                      scale: _scaleAnimation,
+                      child: RotationTransition(
+                        turns: _rotationAnimation,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.amber.shade300,
+                                Colors.orange.shade400,
+                                Colors.deepOrange.shade400,
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.all(12),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(40),
-                          child: Image.asset(
-                            'assets/app_icon2.png',
-                            width: 100,
-                            height: 100,
-                            fit: BoxFit.cover,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.amber.withValues(alpha: 0.6),
+                                blurRadius: 20,
+                                spreadRadius: 3,
+                                offset: const Offset(0, 5),
+                              ),
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.4),
+                                blurRadius: 15,
+                                spreadRadius: 2,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(8),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.3),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            padding: const EdgeInsets.all(12),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(40),
+                              child: Image.asset(
+                                'assets/app_icon2.png',
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 40),
 
-                    // Animated letters container with enhanced styling
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Wrap(
-                        alignment: WrapAlignment.center,
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: List.generate(lettersToShow, (index) {
-                          double wave = sin(
-                            _fadeAnimation.value * pi * 2 + index / 2,
-                          );
-                          return Transform.translate(
-                            offset: Offset(0, wave * 8),
-                            child: Transform.scale(
-                              scale: 0.8 + (_fadeAnimation.value * 0.5),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.amber.withValues(
-                                        alpha: 0.4,
-                                      ),
-                                      blurRadius: 15,
-                                      offset: const Offset(0, 0),
-                                    ),
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.4,
-                                      ),
-                                      blurRadius: 8,
-                                      offset: const Offset(2, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Text(
-                                  alphabet[index],
-                                  style: TextStyle(
-                                    fontSize: 36,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 2,
-                                    foreground:
-                                        Paint()
-                                          ..shader = LinearGradient(
-                                            colors: [
-                                              Colors.amber.shade200,
-                                              Colors.orange.shade400,
-                                              Colors.deepOrange.shade400,
-                                            ],
-                                            stops: [0.0, 0.5, 1.0],
-                                          ).createShader(
-                                            const Rect.fromLTWH(0, 0, 200, 70),
-                                          ),
-                                    shadows: [
-                                      Shadow(
-                                        color: Colors.black.withValues(
-                                          alpha: 0.7,
-                                        ),
-                                        blurRadius: 12,
-                                        offset: const Offset(3, 3),
-                                      ),
-                                      Shadow(
-                                        color: Colors.amber.withValues(
-                                          alpha: 0.4,
-                                        ),
-                                        blurRadius: 10,
-                                        offset: const Offset(-2, -2),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
+                    // A TO Z letters with beautiful animations
+                    SlideTransition(
+                      position: _slideAnimation,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(_letters.length, (index) {
+                          return _buildLetter(_letters[index], index);
                         }),
                       ),
                     ),
 
                     // Beautiful Arabic tagline with enhanced styling
-                    const SizedBox(height: 45),
+                    const SizedBox(height: 50),
                     AnimatedOpacity(
                       opacity: _fadeAnimation.value > 0.5 ? 1.0 : 0.0,
                       duration: const Duration(milliseconds: 800),
@@ -339,10 +382,10 @@ class _SplashScreenState extends State<SplashScreen>
                                     Colors.deepOrange.shade400,
                                     Colors.amber.shade100,
                                   ],
-                                  stops: [0.0, 0.4, 0.8, 1.0],
+                                  stops: const [0.0, 0.4, 0.8, 1.0],
                                 ).createShader(bounds),
                             child: Text(
-                              "كل ما تحتاجه من الألف إلى الياء",
+                              "كل ما تحتاجه العائلة",
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 22,
