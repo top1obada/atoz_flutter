@@ -21,14 +21,45 @@ class PVSong extends ChangeNotifier {
   final AudioPlayer _player = AudioPlayer();
   bool _isPlaying = false;
   String? _currentSong;
+  int _currentSongIndex = 0;
 
   bool get isPlaying => _isPlaying;
   String? get currentSong => _currentSong;
+  int get currentSongIndex => _currentSongIndex;
+
+  PVSong() {
+    _setupAudioPlayerListeners();
+  }
+
+  void _setupAudioPlayerListeners() {
+    _player.onPlayerStateChanged.listen((PlayerState state) {
+      if (state == PlayerState.completed) {
+        // Song finished - restart it automatically
+        _restartCurrentSong();
+      }
+    });
+
+    _player.onPlayerComplete.listen((event) {
+      // Song completed - restart it
+      _restartCurrentSong();
+    });
+  }
+
+  Future<void> _restartCurrentSong() async {
+    if (_currentSong != null) {
+      await _player.stop();
+      await _player.play(
+        AssetSource(_currentSong!.replaceFirst('assets/', '')),
+      );
+      _isPlaying = true;
+      notifyListeners();
+    }
+  }
 
   Future<void> start() async {
     // Read saved song preference on start
     final savedSong = await SaveSong.read();
-    if (savedSong != null) {
+    if (savedSong != null && savedSong.isNotEmpty) {
       _currentSong = savedSong;
       // Auto-play the saved song if it exists
       await play(savedSong);
@@ -63,6 +94,24 @@ class PVSong extends ChangeNotifier {
     }
   }
 
+  Future<void> playNext(List<Map<String, dynamic>> songs) async {
+    if (songs.isEmpty) return;
+
+    int currentIndex = songs.indexWhere((s) => s['file'] == _currentSong);
+    int nextIndex = (currentIndex + 1) % songs.length;
+
+    await play(songs[nextIndex]['file']);
+  }
+
+  Future<void> playPrevious(List<Map<String, dynamic>> songs) async {
+    if (songs.isEmpty) return;
+
+    int currentIndex = songs.indexWhere((s) => s['file'] == _currentSong);
+    int previousIndex = currentIndex <= 0 ? songs.length - 1 : currentIndex - 1;
+
+    await play(songs[previousIndex]['file']);
+  }
+
   @override
   void dispose() {
     _player.dispose();
@@ -78,6 +127,7 @@ class MusicRadioPage extends StatefulWidget {
 }
 
 class _MusicRadioPageState extends State<MusicRadioPage> {
+  // Easy to add more songs - just add new entries to this list
   final List<Map<String, dynamic>> _songs = [
     {
       'title': 'أغنية دبي الاسترخاء',
@@ -86,6 +136,21 @@ class _MusicRadioPageState extends State<MusicRadioPage> {
       'color': Colors.blue,
       'icon': Icons.beach_access,
     },
+    {
+      'title': 'موسيقى هادئة',
+      'artist': 'استرخاء وتأمل',
+      'file': 'assets/relaxing_music.mp3',
+      'color': Colors.green,
+      'icon': Icons.spa,
+    },
+    {
+      'title': 'موسيقى كلاسيكية',
+      'artist': 'ألحان رقيقة',
+      'file': 'assets/classical_music.mp3',
+      'color': Colors.purple,
+      'icon': Icons.music_note,
+    },
+    // Add more songs here easily by copying the format above
   ];
 
   @override
@@ -169,9 +234,7 @@ class _MusicRadioPageState extends State<MusicRadioPage> {
                   const SizedBox(height: 8),
                   Text(
                     songProvider.currentSong != null
-                        ? _songs.firstWhere(
-                          (song) => song['file'] == songProvider.currentSong,
-                        )['title']
+                        ? _getSongTitle(songProvider.currentSong!)
                         : 'اختر أغنية',
                     style: const TextStyle(
                       color: Colors.white,
@@ -181,6 +244,30 @@ class _MusicRadioPageState extends State<MusicRadioPage> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
+
+                  // Navigation buttons when multiple songs available
+                  if (_songs.length > 1 && songProvider.isPlaying)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.skip_previous,
+                            color: Colors.white,
+                          ),
+                          onPressed: () => songProvider.playPrevious(_songs),
+                        ),
+                        const SizedBox(width: 20),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.skip_next,
+                            color: Colors.white,
+                          ),
+                          onPressed: () => songProvider.playNext(_songs),
+                        ),
+                      ],
+                    ),
+
                   // Animated equalizer when playing
                   if (songProvider.isPlaying)
                     Row(
@@ -250,14 +337,14 @@ class _MusicRadioPageState extends State<MusicRadioPage> {
               if (songProvider.currentSong != null) {
                 songProvider.toggle(songProvider.currentSong!);
               } else {
-                // If no song is selected, play the Dubai song
+                // If no song is selected, play the first song
                 songProvider.toggle(_songs.first['file']);
               }
             }),
 
             const SizedBox(height: 24),
 
-            // Single Song Selection with Radio Button
+            // Songs List
             Expanded(
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -274,11 +361,11 @@ class _MusicRadioPageState extends State<MusicRadioPage> {
                 ),
                 child: Column(
                   children: [
-                    const Padding(
-                      padding: EdgeInsets.all(16),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
                       child: Text(
-                        'الأغنية المتاحة',
-                        style: TextStyle(
+                        'الأغاني المتاحة (${_songs.length})',
+                        style: const TextStyle(
                           color: Colors.grey,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -396,6 +483,14 @@ class _MusicRadioPageState extends State<MusicRadioPage> {
         ),
       ),
     );
+  }
+
+  String _getSongTitle(String songFile) {
+    try {
+      return _songs.firstWhere((song) => song['file'] == songFile)['title'];
+    } catch (e) {
+      return 'أغنية غير معروفة';
+    }
   }
 }
 
