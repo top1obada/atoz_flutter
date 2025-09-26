@@ -119,104 +119,99 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-            SingleChildScrollView(
-              controller: _scrollController,
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(widget.wordItems.length, (index) {
-                  final isSelected = index == _selectedIndex;
-                  final wordItem = widget.wordItems[index];
-                  final isDisabled = _isCooldown && !isSelected;
+            // Disable entire widget during cooldown
+            IgnorePointer(
+              ignoring: _isCooldown,
+              child: Opacity(
+                opacity: _isCooldown ? 0.6 : 1.0,
+                child: SingleChildScrollView(
+                  controller: _scrollController,
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(widget.wordItems.length, (index) {
+                      final isSelected = index == _selectedIndex;
+                      final wordItem = widget.wordItems[index];
 
-                  return GestureDetector(
-                    onTap: () {
-                      // Prevent clicking during cooldown (except for the currently selected item)
-                      if (_isCooldown && !isSelected) {
-                        return;
-                      }
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedIndex = index;
+                          });
+                          _scrollToSelectedItem(index);
+                          widget.onWordSelected(wordItem.text);
 
-                      setState(() {
-                        _selectedIndex = index;
-                      });
-                      _scrollToSelectedItem(index);
-                      widget.onWordSelected(wordItem.text);
-
-                      // Start cooldown timer
-                      _startCooldown();
-                    },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      decoration: BoxDecoration(
-                        color:
-                            isSelected
-                                ? _withOpacity(
-                                  wordItem.color,
-                                  0.2,
-                                ) // Using the helper method
-                                : isDisabled
-                                ? Colors.grey[100]
-                                : Colors.transparent,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color:
-                              isSelected
-                                  ? wordItem.color
-                                  : isDisabled
-                                  ? Colors.grey[300]!
-                                  : Colors.transparent,
-                          width: isSelected ? 1.5 : 1.0,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            wordItem.text,
-                            style: TextStyle(
-                              fontSize:
-                                  isSelected
-                                      ? widget.selectedFontSize
-                                      : widget.defaultFontSize,
+                          // Start cooldown timer
+                          _startCooldown();
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          decoration: BoxDecoration(
+                            color:
+                                isSelected
+                                    ? _withOpacity(
+                                      wordItem.color,
+                                      0.2,
+                                    ) // Using the helper method
+                                    : Colors.transparent,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
                               color:
                                   isSelected
                                       ? wordItem.color
-                                      : isDisabled
-                                      ? Colors.grey[400]!
-                                      : widget.defaultColor,
-                              fontWeight:
-                                  isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                              fontFamily: 'NotoNaskhArabic',
+                                      : Colors.transparent,
+                              width: isSelected ? 1.5 : 1.0,
                             ),
                           ),
-                          // Cooldown indicator on the selected item
-                          if (isSelected && _isCooldown)
-                            Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: SizedBox(
-                                width: 12,
-                                height: 12,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    wordItem.color,
-                                  ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                wordItem.text,
+                                style: TextStyle(
+                                  fontSize:
+                                      isSelected
+                                          ? widget.selectedFontSize
+                                          : widget.defaultFontSize,
+                                  color:
+                                      isSelected
+                                          ? wordItem.color
+                                          : widget.defaultColor,
+                                  fontWeight:
+                                      isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                  fontFamily: 'NotoNaskhArabic',
                                 ),
                               ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
+                              // Cooldown indicator on the selected item
+                              if (isSelected && _isCooldown)
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 8),
+                                  child: SizedBox(
+                                    width: 12,
+                                    height: 12,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        wordItem.color,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
               ),
             ),
           ],

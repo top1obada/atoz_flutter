@@ -143,7 +143,8 @@ class _WDStoreSubCategoryItemItemCardState
 
                         // Item Name
                         Text(
-                          widget.storeItemDTO.notes ?? 'منتج غير معروف',
+                          widget.storeItemDTO.subCategoryItemTypeName ??
+                              'منتج غير معروف',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: isSmallDevice ? 19 : 24,

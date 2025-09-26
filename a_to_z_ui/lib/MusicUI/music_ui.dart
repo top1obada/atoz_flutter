@@ -156,10 +156,6 @@ class _MusicRadioPageState extends State<MusicRadioPage> {
   @override
   void initState() {
     super.initState();
-    // Initialize the song provider when screen loads
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<PVSong>().start();
-    });
   }
 
   @override
