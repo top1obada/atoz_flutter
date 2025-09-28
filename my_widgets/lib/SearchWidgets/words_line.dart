@@ -17,6 +17,7 @@ class TextSelectorLine extends StatefulWidget {
   final double selectedFontSize;
   final bool showBackground;
   final int cooldownDuration;
+  final int autoScrollDuration;
 
   const TextSelectorLine({
     super.key,
@@ -28,6 +29,7 @@ class TextSelectorLine extends StatefulWidget {
     this.selectedFontSize = 20.0,
     this.showBackground = true,
     this.cooldownDuration = 2000,
+    this.autoScrollDuration = 3000,
   });
 
   @override
@@ -39,6 +41,10 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
   final ScrollController _scrollController = ScrollController();
   bool _isCooldown = false;
   Timer? _cooldownTimer;
+  Timer? _autoScrollTimer;
+  bool _autoScrollForward = true;
+  bool _userScrolling = false;
+  Timer? _userScrollTimer;
 
   final Map<String, IconData> _iconMap = {
     'phone_iphone': Icons.phone_iphone,
@@ -67,27 +73,109 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
   };
 
   @override
+  void initState() {
+    super.initState();
+    _startAutoScroll();
+
+    // Listen for scroll events to detect user interaction
+    _scrollController.addListener(_handleScroll);
+  }
+
+  @override
   void dispose() {
     _scrollController.dispose();
     _cooldownTimer?.cancel();
+    _autoScrollTimer?.cancel();
+    _userScrollTimer?.cancel();
     super.dispose();
+  }
+
+  void _handleScroll() {
+    if (!_userScrolling) {
+      _userScrolling = true;
+      _autoScrollTimer?.cancel();
+
+      // Restart auto-scroll after user stops scrolling
+      _userScrollTimer?.cancel();
+      _userScrollTimer = Timer(const Duration(seconds: 3), () {
+        _userScrolling = false;
+        _startAutoScroll();
+      });
+    }
+  }
+
+  void _startAutoScroll() {
+    _autoScrollTimer?.cancel();
+    _autoScrollTimer = Timer.periodic(
+      Duration(milliseconds: widget.autoScrollDuration),
+      (timer) {
+        if (!mounted || _userScrolling || _isCooldown) return;
+
+        final maxScroll = _scrollController.position.maxScrollExtent;
+        final currentScroll = _scrollController.offset;
+
+        if (_autoScrollForward) {
+          if (currentScroll >= maxScroll - 1) {
+            // Reached end, reverse direction
+            _autoScrollForward = false;
+            _scrollToPosition(currentScroll - 100);
+          } else {
+            _scrollToPosition(currentScroll + 100);
+          }
+        } else {
+          if (currentScroll <= 1) {
+            // Reached start, reverse direction
+            _autoScrollForward = true;
+            _scrollToPosition(currentScroll + 100);
+          } else {
+            _scrollToPosition(currentScroll - 100);
+          }
+        }
+      },
+    );
+  }
+
+  void _scrollToPosition(double position) {
+    if (!mounted) return;
+
+    final clampedPosition = position.clamp(
+      0.0,
+      _scrollController.position.maxScrollExtent,
+    );
+
+    _scrollController.animateTo(
+      clampedPosition,
+      duration: const Duration(milliseconds: 800),
+      curve: Curves.easeInOut,
+    );
   }
 
   void _startCooldown() {
     setState(() => _isCooldown = true);
+    _autoScrollTimer?.cancel();
     _cooldownTimer?.cancel();
     _cooldownTimer = Timer(Duration(milliseconds: widget.cooldownDuration), () {
       setState(() => _isCooldown = false);
+      if (!_userScrolling) {
+        _startAutoScroll();
+      }
     });
   }
 
   void _scrollToSelectedItem(int index) {
-    final double itemWidth = 100;
+    if (!mounted) return;
+
+    final double itemWidth = 100; // Approximate width of each item
     final double screenWidth = MediaQuery.of(context).size.width;
-    final double scrollPosition =
-        (index * itemWidth) - (screenWidth / 2) + (itemWidth / 2);
+    final double selectedItemOffset = index * itemWidth;
+    final double scrollTo =
+        selectedItemOffset - (screenWidth / 2) + (itemWidth / 2);
+
+    final double maxScroll = _scrollController.position.maxScrollExtent;
+    final double clampedScroll = scrollTo.clamp(0.0, maxScroll);
+
     _scrollController.animateTo(
-      scrollPosition.clamp(0.0, _scrollController.position.maxScrollExtent),
+      clampedScroll,
       duration: const Duration(milliseconds: 500),
       curve: Curves.easeInOut,
     );
@@ -156,6 +244,8 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
                 child: SingleChildScrollView(
                   controller: _scrollController,
                   scrollDirection: Axis.horizontal,
+                  physics:
+                      const AlwaysScrollableScrollPhysics(), // Always allow scrolling
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(widget.wordItems.length, (index) {
@@ -185,7 +275,7 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
                           decoration: BoxDecoration(
                             color:
                                 isSelected
-                                    ? wordItem.color.withOpacity(0.2)
+                                    ? wordItem.color.withValues(alpha: 0.2)
                                     : Colors.transparent,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(

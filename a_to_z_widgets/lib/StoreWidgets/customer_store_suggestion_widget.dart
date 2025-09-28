@@ -68,7 +68,7 @@ class _WDStoreSuggestionCardState extends State<WDStoreSuggestionCard> {
                   widget.storeSuggestionDTO.storeName ?? 'متجر غير معروف',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: isSmallDevice ? 20 : 25,
+                    fontSize: isSmallDevice ? 17 : 22,
                     color: Colors.black,
                     overflow: TextOverflow.ellipsis,
                     fontFamily: 'Tajawal',
@@ -83,7 +83,7 @@ class _WDStoreSuggestionCardState extends State<WDStoreSuggestionCard> {
                 Text(
                   widget.storeSuggestionDTO.storeTypeName ?? 'نوع غير معروف',
                   style: TextStyle(
-                    fontSize: isSmallDevice ? 15 : 20,
+                    fontSize: isSmallDevice ? 12 : 17,
                     color: ColorService.parseColor(
                       widget.storeSuggestionDTO.hexCode,
                       widget.storeSuggestionDTO.shade,
@@ -153,14 +153,14 @@ class _WDStoreSuggestionCardState extends State<WDStoreSuggestionCard> {
       children: [
         Icon(
           Icons.location_on,
-          size: isSmallDevice ? 11 : 15,
+          size: isSmallDevice ? 9 : 13,
           color: Colors.red,
         ),
         const SizedBox(width: 3),
         Text(
           '$formattedDistance كم',
           style: TextStyle(
-            fontSize: isSmallDevice ? 12 : 15,
+            fontSize: isSmallDevice ? 10 : 13,
             color: Colors.grey[600],
             fontWeight: FontWeight.bold,
             fontFamily: 'Tajawal',
