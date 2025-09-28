@@ -258,7 +258,7 @@ class _TextSelectorLineState extends State<TextSelectorLine> {
                               _selectedIndex = -1;
                             } else {
                               _selectedIndex = index;
-                              _scrollToSelectedItem(index);
+
                               widget.onWordSelected(wordItem.text);
                               _startCooldown();
                             }

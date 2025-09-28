@@ -136,20 +136,7 @@ class _MusicRadioPageState extends State<MusicRadioPage> {
       'color': Colors.blue,
       'icon': Icons.beach_access,
     },
-    {
-      'title': 'موسيقى هادئة',
-      'artist': 'استرخاء وتأمل',
-      'file': 'assets/relaxing_music.mp3',
-      'color': Colors.green,
-      'icon': Icons.spa,
-    },
-    {
-      'title': 'موسيقى كلاسيكية',
-      'artist': 'ألحان رقيقة',
-      'file': 'assets/classical_music.mp3',
-      'color': Colors.purple,
-      'icon': Icons.music_note,
-    },
+
     // Add more songs here easily by copying the format above
   ];
 

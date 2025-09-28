@@ -78,6 +78,7 @@ class _CustomerMinMenuUi extends State<CustomerMainMenuUi>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   Timer? _pauseTimer;
+  bool _isRotating = true; // Local state for rotation
 
   @override
   void initState() {
@@ -93,8 +94,9 @@ class _CustomerMinMenuUi extends State<CustomerMainMenuUi>
   }
 
   void _startPause() {
-    final rotationsProvider = context.read<PVRotations>();
-    rotationsProvider.isRotating = false;
+    setState(() {
+      _isRotating = false;
+    });
 
     _pauseTimer = Timer(const Duration(seconds: 2), () {
       // Reset controller before starting new rotation
@@ -104,8 +106,9 @@ class _CustomerMinMenuUi extends State<CustomerMainMenuUi>
   }
 
   void _startRotation() {
-    final rotationsProvider = context.read<PVRotations>();
-    rotationsProvider.isRotating = true;
+    setState(() {
+      _isRotating = true;
+    });
 
     _controller.forward().then((_) {
       // After rotation completes, pause for 2 seconds
@@ -125,15 +128,10 @@ class _CustomerMinMenuUi extends State<CustomerMainMenuUi>
       animation: _controller,
       builder: (context, child) {
         // One full rotation (0 to 2π) - only when rotating
-        final double rotation =
-            context.read<PVRotations>().isRotating
-                ? _controller.value * 2 * pi
-                : 0;
+        final double rotation = _isRotating ? _controller.value * 2 * pi : 0;
         // Gentle pulse animation only when rotating
         final scale =
-            context.read<PVRotations>().isRotating
-                ? 1.0 + sin(_controller.value * 2 * pi) * 0.1
-                : 1.0;
+            _isRotating ? 1.0 + sin(_controller.value * 2 * pi) * 0.1 : 1.0;
 
         return Center(
           child: Transform.rotate(
@@ -141,41 +139,65 @@ class _CustomerMinMenuUi extends State<CustomerMainMenuUi>
             child: Transform.scale(
               scale: scale,
               child: Container(
-                width: 40,
-                height: 40,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white, // White circle
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.amber.shade300,
+                      Colors.orange.shade400,
+                      Colors.deepOrange.shade400,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withValues(
-                        alpha: 0.5,
+                      color: Colors.amber.withOpacity(
+                        0.6,
                       ), // Fixed: withOpacity
-                      blurRadius: 8,
+                      blurRadius: 10,
+                      spreadRadius: 1,
                       offset: const Offset(0, 2),
                     ),
                   ],
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.asset(
-                    'assets/app_icon2.png',
-                    width: 36,
-                    height: 36,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: Colors.amber[300],
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: const Icon(
-                          Icons.shopping_bag,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                      );
-                    },
+                padding: const EdgeInsets.all(4),
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(
+                          0.2,
+                        ), // Fixed: withOpacity
+                        blurRadius: 4,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(4),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.asset(
+                      'assets/app_icon2.png',
+                      width: 32,
+                      height: 32,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          decoration: BoxDecoration(
+                            color: Colors.amber[300],
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Icon(
+                            Icons.shopping_bag,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -194,9 +216,7 @@ class _CustomerMinMenuUi extends State<CustomerMainMenuUi>
   Widget build(BuildContext context) {
     return SafeArea(
       child: BaseScaffold(
-        titleWidget: Consumer<PVRotations>(
-          builder: (context, value, child) => _buildTitleWidget(),
-        ),
+        titleWidget: _buildTitleWidget(),
         body: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

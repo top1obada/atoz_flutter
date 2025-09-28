@@ -20,6 +20,70 @@ import 'package:a_to_z_providers/SessionProviders/drop_session_provider.dart';
 class BaseDrawer extends StatelessWidget {
   const BaseDrawer({super.key});
 
+  Widget _buildAppIcon() {
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          colors: [
+            Colors.amber.shade300,
+            Colors.orange.shade400,
+            Colors.deepOrange.shade400,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.amber.withValues(alpha: 0.6),
+            blurRadius: 10,
+            spreadRadius: 1,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(6),
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 4,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(6),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(25),
+          child: Image.asset(
+            'assets/app_icon2.png',
+            width: 44,
+            height: 44,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.amber[300],
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                child: const Icon(
+                  Icons.shopping_bag,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
@@ -28,6 +92,7 @@ class BaseDrawer extends StatelessWidget {
           padding: const EdgeInsets.all(5),
           child: ListView(
             children: [
+              // App Icon Header
               Container(
                 width: double.infinity,
                 height: 140,
@@ -36,22 +101,13 @@ class BaseDrawer extends StatelessWidget {
                   borderRadius: BorderRadius.circular(70),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.blue.shade200.withAlpha(
-                        (0.5 * 255).round(),
-                      ),
+                      color: Colors.blue.shade200.withValues(alpha: 0.5),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-                child: Align(
-                  alignment: Alignment.center,
-                  child: Icon(
-                    Icons.store,
-                    size: 80,
-                    color: Colors.blue.shade700,
-                  ),
-                ),
+                child: Center(child: _buildAppIcon()),
               ),
 
               const Divider(),
