@@ -210,56 +210,14 @@ class _CustomerMinMenuUi extends State<CustomerMainMenuUi>
   }
 
   Widget _buildTitleWidget() {
-    return Container(
-      // Constrain the title widget to prevent overflow
-      constraints: const BoxConstraints(maxWidth: 200),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildAnimatedIcon(),
-          const SizedBox(width: 8), // Reduced spacing
-          Flexible(
-            // Use Flexible to prevent text overflow
-            child: ShaderMask(
-              shaderCallback:
-                  (bounds) => LinearGradient(
-                    colors: [
-                      Colors.amber.shade300,
-                      Colors.orange.shade400,
-                      Colors.deepOrange.shade400,
-                    ],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                  ).createShader(bounds),
-              child: Text(
-                'A TO Z',
-                style: TextStyle(
-                  fontSize: 20, // Slightly smaller font
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withValues(alpha: 0.5),
-                      blurRadius: 6,
-                      offset: const Offset(1, 1),
-                    ),
-                  ],
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    return _buildAnimatedIcon(); // Only return the animated icon
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: BaseScaffold(
-        titleWidget: _buildTitleWidget(),
+        titleWidget: _buildTitleWidget(), // Only the icon, no text
         body: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
