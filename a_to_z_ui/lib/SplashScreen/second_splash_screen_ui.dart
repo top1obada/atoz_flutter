@@ -88,6 +88,7 @@ class _SplashScreenState extends State<SplashScreen>
             builder: (con) {
               return MultiProvider(
                 providers: [
+                  ChangeNotifierProvider(create: (_) => PVRotations()),
                   ChangeNotifierProvider.value(value: currentLoginInfo),
                   ChangeNotifierProvider(
                     create: (_) {
@@ -118,7 +119,7 @@ class _SplashScreenState extends State<SplashScreen>
                     value: PVCustomerLoginByUsername(),
                   ),
                 ],
-                child: MaterialApp(home: const CustomerLoginScreenUI()),
+                child: const CustomerLoginScreenUI(),
               ),
         ),
       );

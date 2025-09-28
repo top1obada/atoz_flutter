@@ -72,6 +72,7 @@ class _CustomerLoginScreenUIState extends State<CustomerLoginScreenUI> {
             builder:
                 (innerContext) => MultiProvider(
                   providers: [
+                    ChangeNotifierProvider(create: (_) => PVRotations()),
                     ChangeNotifierProvider(
                       create: (_) {
                         var pv = PVSong();

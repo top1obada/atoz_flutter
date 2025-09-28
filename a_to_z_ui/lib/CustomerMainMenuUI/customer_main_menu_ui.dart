@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:a_to_z_providers/BasesProviders/base_current_login_info_provider.dart';
 import 'package:a_to_z_providers/StoreProviders/customer_famous_stores_provider.dart';
 import 'package:a_to_z_providers/StoreProviders/customer_favorite_stores_provider.dart';
@@ -16,6 +18,19 @@ import 'package:a_to_z_ui/CustomerMainMenuUI/customer_stores_suggestions_ui.dart
 import 'package:provider/provider.dart';
 import 'package:a_to_z_ui/CustomerMainMenuUI/customer_famous_stores_ui.dart';
 import 'package:a_to_z_providers/StoreProviders/customer_searching_stores_provider.dart';
+
+class PVRotations extends ChangeNotifier {
+  bool _isRotating = false;
+
+  bool get isRotating => _isRotating;
+
+  set isRotating(bool value) {
+    if (_isRotating != value) {
+      _isRotating = value;
+      notifyListeners();
+    }
+  }
+}
 
 enum EnMainMenuPages {
   eCustomerStoresSuggestions(1),
@@ -62,9 +77,7 @@ class CustomerMainMenuUi extends StatefulWidget {
 class _CustomerMinMenuUi extends State<CustomerMainMenuUi>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _rotationAnimation;
-  late Animation<double> _scaleAnimation;
-  late Animation<double> _bounceAnimation;
+  Timer? _pauseTimer;
 
   @override
   void initState() {
@@ -72,48 +85,38 @@ class _CustomerMinMenuUi extends State<CustomerMainMenuUi>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 4),
+      duration: const Duration(seconds: 2), // 2 seconds for one full rotation
     );
 
-    _rotationAnimation = Tween<double>(begin: 0, end: 2 * pi).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 1.0, curve: Curves.linear),
-      ),
-    );
+    // Start immediately with rotation
+    _startRotation();
+  }
 
-    _scaleAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween<double>(begin: 1.0, end: 1.05), weight: 1),
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1.05, end: 0.95),
-        weight: 1,
-      ),
-      TweenSequenceItem(tween: Tween<double>(begin: 0.95, end: 1.0), weight: 1),
-    ]).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 1.0, curve: Curves.easeInOut),
-      ),
-    );
+  void _startPause() {
+    final rotationsProvider = context.read<PVRotations>();
+    rotationsProvider.isRotating = false;
 
-    _bounceAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween<double>(begin: 0.0, end: -5.0), weight: 1),
-      TweenSequenceItem(tween: Tween<double>(begin: -5.0, end: 0.0), weight: 1),
-      TweenSequenceItem(tween: Tween<double>(begin: 0.0, end: -3.0), weight: 1),
-      TweenSequenceItem(tween: Tween<double>(begin: -3.0, end: 0.0), weight: 1),
-    ]).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 1.0, curve: Curves.elasticOut),
-      ),
-    );
+    _pauseTimer = Timer(const Duration(seconds: 2), () {
+      // Reset controller before starting new rotation
+      _controller.reset();
+      _startRotation();
+    });
+  }
 
-    _controller.repeat();
+  void _startRotation() {
+    final rotationsProvider = context.read<PVRotations>();
+    rotationsProvider.isRotating = true;
+
+    _controller.forward().then((_) {
+      // After rotation completes, pause for 2 seconds
+      _startPause();
+    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _pauseTimer?.cancel();
     super.dispose();
   }
 
@@ -121,84 +124,58 @@ class _CustomerMinMenuUi extends State<CustomerMainMenuUi>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        return Container(
-          // Add margin to ensure the icon stays within bounds
-          margin: const EdgeInsets.all(4),
-          child: Transform.translate(
-            offset: Offset(0, _bounceAnimation.value),
+        // One full rotation (0 to 2π) - only when rotating
+        final double rotation =
+            context.read<PVRotations>().isRotating
+                ? _controller.value * 2 * pi
+                : 0;
+        // Gentle pulse animation only when rotating
+        final scale =
+            context.read<PVRotations>().isRotating
+                ? 1.0 + sin(_controller.value * 2 * pi) * 0.1
+                : 1.0;
+
+        return Center(
+          child: Transform.rotate(
+            angle: rotation,
             child: Transform.scale(
-              scale: _scaleAnimation.value,
-              child: Transform.rotate(
-                angle: _rotationAnimation.value,
-                child: Container(
-                  // Smaller container to fit within AppBar
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.amber.shade300,
-                        Colors.orange.shade400,
-                        Colors.deepOrange.shade400,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+              scale: scale,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white, // White circle
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withValues(
+                        alpha: 0.5,
+                      ), // Fixed: withOpacity
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.amber.withValues(alpha: 0.6),
-                        blurRadius: 10,
-                        spreadRadius: 1,
-                        offset: const Offset(0, 2),
-                      ),
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.3),
-                        blurRadius: 6,
-                        spreadRadius: 0.5,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  padding: const EdgeInsets.all(4), // Reduced padding
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.2),
-                          blurRadius: 4,
-                          offset: const Offset(0, 1),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.asset(
+                    'assets/app_icon2.png',
+                    width: 36,
+                    height: 36,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        decoration: BoxDecoration(
+                          color: Colors.amber[300],
+                          borderRadius: BorderRadius.circular(18),
                         ),
-                      ],
-                    ),
-                    padding: const EdgeInsets.all(4), // Reduced padding
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20), // Smaller radius
-                      child: Image.asset(
-                        'assets/app_icon2.png',
-                        width: 32, // Smaller size
-                        height: 32, // Smaller size
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          // Fallback if image fails to load
-                          return Container(
-                            width: 32,
-                            height: 32,
-                            decoration: BoxDecoration(
-                              color: Colors.amber.shade300,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: const Icon(
-                              Icons.shopping_bag,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
+                        child: const Icon(
+                          Icons.shopping_bag,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -210,14 +187,16 @@ class _CustomerMinMenuUi extends State<CustomerMainMenuUi>
   }
 
   Widget _buildTitleWidget() {
-    return _buildAnimatedIcon(); // Only return the animated icon
+    return _buildAnimatedIcon();
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: BaseScaffold(
-        titleWidget: _buildTitleWidget(), // Only the icon, no text
+        titleWidget: Consumer<PVRotations>(
+          builder: (context, value, child) => _buildTitleWidget(),
+        ),
         body: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

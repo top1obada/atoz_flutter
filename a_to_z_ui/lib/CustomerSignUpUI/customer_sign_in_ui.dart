@@ -88,6 +88,7 @@ class _UICustomerSignUp extends State<UICustomerSignUp> {
         builder:
             (innerContext) => MultiProvider(
               providers: [
+                ChangeNotifierProvider(create: (_) => PVRotations()),
                 ChangeNotifierProvider(create: (_) => PVSong()),
                 ChangeNotifierProvider.value(value: pvbaseCurrentLoginInfo),
                 ChangeNotifierProvider(
