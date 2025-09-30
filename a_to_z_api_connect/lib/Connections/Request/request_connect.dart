@@ -26,12 +26,12 @@ class RequestConnect {
       } else if (result.statusCode == 400) {
         return Left(result.data?.toString() ?? "Bad request");
       } else if (result.statusCode == 500) {
-        return Left(result.data?.toString() ?? "Internal server error");
+        return Left(result.data ?? "Internal server error");
       } else {
         return Left("Unexpected error: ${result.statusCode}");
       }
     } catch (e) {
-      return Left(e.toString());
+      return Left('hi');
     }
   }
 

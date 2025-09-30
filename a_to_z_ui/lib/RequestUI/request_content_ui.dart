@@ -268,7 +268,7 @@ class _RequestContentUi extends State<RequestContentUi> {
                       Consumer<PVShowRequest>(
                         builder:
                             (context, value, child) => Text(
-                              '${(showRequest.totalDue - showRequest.discount - showRequest.requestShow!.balanceUsedVaue!).toStringAsFixed(2)} ليرة سورية',
+                              '${(showRequest.totalDue - showRequest.discount - (showRequest.requestShow!.balanceUsedVaue == null ? 0 : showRequest.requestShow!.balanceUsedVaue!)).toStringAsFixed(2)} ليرة سورية',
                               style: TextStyle(
                                 fontFamily: 'Tajawal',
                                 fontSize: 16,
