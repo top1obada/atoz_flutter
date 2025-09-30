@@ -9,13 +9,13 @@ class PVDropSessionProvider extends ChangeNotifier {
 
     final result = await SessionConnect.dropSession();
 
-    return result.fold(
+    return await result.fold(
       (left) {
         Errors.errorMessage = left;
         return false;
       },
-      (right) {
-        StorageService.clear();
+      (right) async {
+        await StorageService.clear();
         return right;
       },
     );

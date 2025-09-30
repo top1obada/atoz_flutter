@@ -2,7 +2,8 @@ enum EnRequestStatus {
   ePending(1),
   eCancled(2),
   eRejected(3),
-  eCompleted(4);
+  eOnRoad(4),
+  eCompleted(5);
 
   final int value;
 

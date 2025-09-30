@@ -1,6 +1,7 @@
 import 'package:a_to_z_dto/ItemDTO/store_sub_category_item_item_dto.dart';
 import 'package:a_to_z_dto/RequestDTO/request_dto.dart';
 import 'package:a_to_z_providers/BasesProviders/base_current_login_info_provider.dart';
+import 'package:a_to_z_providers/Global/errors.dart';
 import 'package:a_to_z_providers/ItemProviders/store_sub_category_item_items_provider.dart';
 import 'package:a_to_z_providers/RequestProviders/request_provider.dart';
 import 'package:a_to_z_ui/CustomerBalanceUI/CustomerBalanceDialogs/customer_balance_dialog.dart';
@@ -46,6 +47,22 @@ class _RequestContentUi extends State<RequestContentUi> {
     await showCustomerBalanceDialog(
       context: context,
       onBalanceSelected: (selectedBalance) {
+        if (selectedBalance >
+            (context.read<PVShowRequest>().totalDue -
+                context.read<PVShowRequest>().discount)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'المبلغ المحدد يتجاوز المبلغ المستحق. يرجى اختيار مبلغ أقل',
+                textAlign: TextAlign.right,
+                style: const TextStyle(fontFamily: 'Tajawal'),
+              ),
+              backgroundColor: Colors.red[700],
+            ),
+          );
+          return;
+        }
+
         context
             .read<PVRequest>()
             .completedRequestDto!
@@ -248,14 +265,17 @@ class _RequestContentUi extends State<RequestContentUi> {
                           color: Colors.blue,
                         ),
                       ),
-                      Text(
-                        '${showRequest.totalDue.toStringAsFixed(2)} ليرة سورية',
-                        style: TextStyle(
-                          fontFamily: 'Tajawal',
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green[700],
-                        ),
+                      Consumer<PVShowRequest>(
+                        builder:
+                            (context, value, child) => Text(
+                              '${(showRequest.totalDue - showRequest.discount - showRequest.requestShow!.balanceUsedVaue!).toStringAsFixed(2)} ليرة سورية',
+                              style: TextStyle(
+                                fontFamily: 'Tajawal',
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green[700],
+                              ),
+                            ),
                       ),
                     ],
                   ),
@@ -308,7 +328,7 @@ class _RequestContentUi extends State<RequestContentUi> {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(0, -2),
               ),
@@ -380,7 +400,7 @@ class _RequestContentUi extends State<RequestContentUi> {
                     Icon(Icons.error, color: Colors.red[700], size: 20),
                     const SizedBox(width: 8),
                     Text(
-                      'فشل في تأكيد الطلب',
+                      Errors.errorMessage!,
                       style: TextStyle(
                         fontFamily: 'Tajawal',
                         fontSize: 14, // Reduced font size

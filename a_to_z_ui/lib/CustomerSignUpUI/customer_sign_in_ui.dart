@@ -13,6 +13,7 @@ import 'package:my_widgets/TextsFiledsFunctions/TextFileds.dart';
 import 'package:my_widgets/Validators/vd_not_empty.dart';
 import 'package:my_widgets/GenderWidgets/gender_selector_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:a_to_z_providers/Global/errors.dart' as error;
 
 class UICustomerSignUp extends StatefulWidget {
   const UICustomerSignUp({super.key});
@@ -71,8 +72,8 @@ class _UICustomerSignUp extends State<UICustomerSignUp> {
 
     if (!result) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('فشل في إنشاء الحساب'),
+        SnackBar(
+          content: Text(error.Errors.errorMessage!),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 2),
         ),
