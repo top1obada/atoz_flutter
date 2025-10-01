@@ -70,7 +70,7 @@ class DioClient {
     BaseOptions(
       baseUrl: 'http://atoz.runasp.net/api/',
       validateStatus: (status) {
-        return true; // Accept status codes less than 500 as success
+        return status! <= 500; // Accept status codes less than 500 as success
         // OR return true for all status codes:
         // return true;
       },
