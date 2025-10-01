@@ -319,16 +319,12 @@ class _RequestContentUi extends State<RequestContentUi> {
           ),
         ),
         bottomNavigationBar: Container(
-          height: 70, // Reduced height
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 8,
-          ), // Reduced padding
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
+                color: Colors.black.withOpacity(0.1),
                 blurRadius: 10,
                 offset: const Offset(0, -2),
               ),
@@ -344,107 +340,160 @@ class _RequestContentUi extends State<RequestContentUi> {
               final currentProvider = context.read<PVRequest>();
 
               if (isLoading) {
-                return const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                return Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.blue,
+                          ),
+                        ),
                       ),
-                    ),
-                    SizedBox(width: 12),
-                    Text(
-                      'جاري تأكيد الطلب...',
-                      style: TextStyle(
-                        fontFamily: 'Tajawal',
-                        fontSize: 14, // Reduced font size
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
+                      const SizedBox(width: 12),
+                      Flexible(
+                        child: Text(
+                          'جاري تأكيد الطلب...',
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               }
 
               if (currentProvider.requestID != null) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.check_circle,
-                      color: Colors.green[700],
-                      size: 20, // Reduced icon size
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'تم تأكيد الطلب بنجاح',
-                      style: TextStyle(
-                        fontFamily: 'Tajawal',
-                        fontSize: 14, // Reduced font size
-                        fontWeight: FontWeight.bold,
+                return Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.check_circle,
                         color: Colors.green[700],
+                        size: 22,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          'تم تأكيد الطلب بنجاح',
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green[700],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               }
 
               if (currentProvider.isLoaded &&
                   currentProvider.requestID == null) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.error, color: Colors.red[700], size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      Errors.errorMessage!,
-                      style: TextStyle(
-                        fontFamily: 'Tajawal',
-                        fontSize: 14, // Reduced font size
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red[700],
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          color: Colors.red[700],
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            Errors.errorMessage ?? 'فشل في تأكيد الطلب',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'Tajawal',
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red[700],
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
+                          currentProvider.putItems(
+                            showRequest.requestShow!.storeSubCategoryItemItems!,
+                          );
+                          await currentProvider.request();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red[700],
+                          side: BorderSide(color: Colors.red[700]!),
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        icon: Icon(
+                          Icons.refresh,
+                          size: 16,
+                          color: Colors.red[700],
+                        ),
+                        label: Text(
+                          'إعادة المحاولة',
+                          style: TextStyle(
+                            fontFamily: 'Tajawal',
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 );
               }
 
-              return ElevatedButton(
-                onPressed: () async {
-                  currentProvider.putItems(
-                    showRequest.requestShow!.storeSubCategoryItemItems!,
-                  );
-                  await currentProvider.request();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[700],
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 12,
-                    horizontal: 24,
-                  ), // Reduced padding
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 4,
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.send, size: 18, color: Colors.white),
-                    SizedBox(width: 6),
-                    Text(
-                      'تأكيد الطلب',
-                      style: TextStyle(
-                        fontFamily: 'Tajawal',
-                        fontSize: 16, // Reduced font size
-                        fontWeight: FontWeight.bold,
-                      ),
+              return SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () async {
+                    currentProvider.putItems(
+                      showRequest.requestShow!.storeSubCategoryItemItems!,
+                    );
+                    await currentProvider.request();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[700],
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                  ],
+                    elevation: 4,
+                  ),
+                  icon: const Icon(Icons.send, size: 18, color: Colors.white),
+                  label: const Text(
+                    'تأكيد الطلب',
+                    style: TextStyle(
+                      fontFamily: 'Tajawal',
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               );
             },
