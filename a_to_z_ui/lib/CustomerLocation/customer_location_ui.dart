@@ -1,4 +1,3 @@
-import 'package:a_to_z_dto/LocationDTO/user_point_dto.dart';
 import 'package:a_to_z_providers/BasesProviders/base_current_login_info_provider.dart';
 import 'package:a_to_z_providers/CustomerLocation/get_customer_location_provider.dart';
 import 'package:a_to_z_widgets/ATOZAnimations/a_to_z_animation.dart';
@@ -59,8 +58,6 @@ class _CustomerLocationUi extends State<CustomerLocationUi> {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
-    final screenHeight = mediaQuery.size.height;
-    final screenWidth = mediaQuery.size.width;
 
     return SafeArea(
       child: Scaffold(
@@ -126,7 +123,7 @@ class _CustomerLocationUi extends State<CustomerLocationUi> {
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               blurRadius: 8,
                               offset: const Offset(0, 2),
                             ),
@@ -310,7 +307,7 @@ class _CustomerLocationUi extends State<CustomerLocationUi> {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 10,
                     offset: const Offset(0, -2),
                   ),
