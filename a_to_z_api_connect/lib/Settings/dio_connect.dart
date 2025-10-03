@@ -68,7 +68,7 @@ class DioClient {
   // Dio ثابت وفوري الإنشاء
   static final Dio dio = Dio(
     BaseOptions(
-      baseUrl: 'http://atoz.runasp.net/api/',
+      baseUrl: 'https://localhost:7094/api/',
       validateStatus: (status) {
         return status! <= 500; // Accept status codes less than 500 as success
         // OR return true for all status codes:

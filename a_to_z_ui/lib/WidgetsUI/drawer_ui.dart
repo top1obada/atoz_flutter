@@ -2,10 +2,13 @@ import 'package:a_to_z_providers/AddressProviders/find_address_provider.dart';
 import 'package:a_to_z_providers/BasesProviders/base_current_login_info_provider.dart';
 import 'package:a_to_z_providers/ContactInformationsProviders/get_person_contact_information_provider.dart';
 import 'package:a_to_z_providers/CustomerBalanceProviders/customer_balance_payments_history_and_customer_balance_provider.dart';
+import 'package:a_to_z_providers/CustomerLocation/get_customer_location_provider.dart';
+import 'package:a_to_z_providers/CustomerLocation/update_customer_location_provider.dart';
 import 'package:a_to_z_providers/LoginProviders/customer_login_by_username_provider.dart';
 import 'package:a_to_z_providers/PersonProviders/get_person_info_provider.dart';
 import 'package:a_to_z_providers/RandomCodeProviders/phone_number_random_code_provider.dart';
 import 'package:a_to_z_providers/RequestProviders/customer_requests_provider.dart';
+import 'package:a_to_z_ui/CustomerLocation/customer_location_ui.dart';
 import 'package:a_to_z_ui/CustomerLoginUI/customer_login_ui.dart';
 import 'package:a_to_z_ui/MusicUI/music_ui.dart';
 import 'package:a_to_z_ui/ProfileUI/profile_ui.dart';
@@ -244,12 +247,30 @@ class BaseDrawer extends StatelessWidget {
 
               // Help
               ListTile(
-                leading: const Icon(Icons.help_outline, color: Colors.blueGrey),
-                title: const Text(
-                  'المساعدة والأسئلة الشائعة',
-                  textDirection: TextDirection.rtl,
-                ),
-                onTap: () {},
+                leading: const Icon(Icons.place, color: Colors.blueGrey),
+                title: const Text('موقعي', textDirection: TextDirection.rtl),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (con) => MultiProvider(
+                            providers: [
+                              ChangeNotifierProvider(
+                                create: (_) => PvGetCustomerLocation(),
+                              ),
+                              ChangeNotifierProvider(
+                                create: (_) => PvUpdateCustomerLocation(),
+                              ),
+                              ChangeNotifierProvider.value(
+                                value: context.read<PVBaseCurrentLoginInfo>(),
+                              ),
+                            ],
+                            child: const CustomerLocationUi(),
+                          ),
+                    ),
+                  );
+                },
               ),
 
               // Logout
