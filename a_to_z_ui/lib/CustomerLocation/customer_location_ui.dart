@@ -58,12 +58,13 @@ class _CustomerLocationUi extends State<CustomerLocationUi> {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
 
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
           title: const Text(
-            'موقع العميل',
+            'الموقع',
             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
           ),
           backgroundColor: Colors.blue,
@@ -103,194 +104,127 @@ class _CustomerLocationUi extends State<CustomerLocationUi> {
               );
             }
 
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                // حساب الارتفاع المناسب للخريطة بناءً على حجم الشاشة
-                final mapHeight =
-                    constraints.maxHeight * 0.4; // 40% من الارتفاع المتاح
-
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      // الخريطة
-                      Container(
-                        height: mapHeight.clamp(
-                          200,
-                          400,
-                        ), // حد أدنى وأقصى للارتفاع
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  // الخريطة - أكبر حجماً
+                  Container(
+                    height: screenHeight * 0.6, // 60% من ارتفاع الشاشة
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
                         ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: LocationShow(
-                            initialLatitude: value.customerLocation!.latitude!,
-                            initialLongitude:
-                                value.customerLocation!.longitude!,
-                            allowUpdate: true,
-                            markerTitle: 'الموقع',
-                            onLocationChanged: (L) {
-                              value.customerLocation!.latitude = L.latitude;
-                              value.customerLocation!.longitude = L.longitude;
-                            },
-                          ),
-                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: LocationShow(
+                        initialLatitude: value.customerLocation!.latitude!,
+                        initialLongitude: value.customerLocation!.longitude!,
+                        allowUpdate: true,
+                        markerTitle: 'الموقع',
+                        onLocationChanged: (L) {
+                          value.customerLocation!.latitude = L.latitude;
+                          value.customerLocation!.longitude = L.longitude;
+                        },
                       ),
+                    ),
+                  ),
 
-                      const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                      // معلومات الإحداثيات
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.blue[50],
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.blue),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.location_pin,
-                              color: Colors.blue,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'الإحداثيات الحالية:',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.blue,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    '${value.customerLocation!.latitude?.toStringAsFixed(6) ?? '--'}, ${value.customerLocation!.longitude?.toStringAsFixed(6) ?? '--'}',
-                                    style: const TextStyle(fontSize: 10),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // حقل العنوان
-                      Card(
-                        elevation: 1,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                  // حقل العنوان
+                  Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Row(
                             children: [
-                              const Row(
-                                children: [
-                                  Icon(
-                                    Icons.home,
-                                    size: 18,
-                                    color: Colors.orange,
-                                  ),
-                                  SizedBox(width: 6),
-                                  Text(
-                                    'العنوان التفصيلي',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.orange,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              TextField(
-                                controller: _addressController,
-                                maxLines: 2,
-                                decoration: InputDecoration(
-                                  hintText: 'أدخل العنوان التفصيلي هنا...',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    borderSide: const BorderSide(
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(6),
-                                    borderSide: const BorderSide(
-                                      color: Colors.blue,
-                                    ),
-                                  ),
-                                  contentPadding: const EdgeInsets.all(10),
-                                  isDense: true,
+                              Icon(Icons.home, size: 20, color: Colors.orange),
+                              SizedBox(width: 8),
+                              Text(
+                                'العنوان التفصيلي',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.orange,
+                                  fontSize: 16,
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 12),
-
-                      // آخر تحديث
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[100],
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.update,
-                              size: 14,
-                              color: Colors.grey,
-                            ),
-                            const SizedBox(width: 6),
-                            const Text(
-                              'آخر تحديث:',
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 11,
+                          const SizedBox(height: 10),
+                          TextField(
+                            controller: _addressController,
+                            maxLines: 2,
+                            decoration: InputDecoration(
+                              hintText: 'أدخل العنوان التفصيلي هنا...',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(
+                                  color: Colors.grey,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              _formatDate(value.customerLocation!.updatedDate),
-                              style: const TextStyle(
-                                color: Colors.grey,
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                                borderSide: const BorderSide(
+                                  color: Colors.blue,
+                                ),
                               ),
+                              contentPadding: const EdgeInsets.all(12),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-
-                      // مساحة إضافية في الأسفل لتجنب التداخل مع الزر
-                      SizedBox(height: mediaQuery.viewPadding.bottom + 80),
-                    ],
+                    ),
                   ),
-                );
-              },
+
+                  const SizedBox(height: 16),
+
+                  // آخر تحديث
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.update, size: 16, color: Colors.grey),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'آخر تحديث:',
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          _formatDate(value.customerLocation!.updatedDate),
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // مساحة إضافية في الأسفل لتجنب التداخل مع الزر
+                  SizedBox(height: mediaQuery.viewPadding.bottom + 20),
+                ],
+              ),
             );
           },
         ),
@@ -314,35 +248,35 @@ class _CustomerLocationUi extends State<CustomerLocationUi> {
                 ],
               ),
               child: SizedBox(
-                height: 48,
+                height: 50,
                 child: ElevatedButton.icon(
                   onPressed: updateProvider.isLoading ? null : _updateLocation,
                   icon:
                       updateProvider.isLoading
                           ? SizedBox(
-                            width: 18,
-                            height: 18,
+                            width: 20,
+                            height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation(Colors.white),
                             ),
                           )
-                          : const Icon(Icons.save, size: 18),
+                          : const Icon(Icons.save, size: 20),
                   label:
                       updateProvider.isLoading
                           ? const Text(
                             'جاري الحفظ...',
-                            style: TextStyle(fontSize: 14),
+                            style: TextStyle(fontSize: 16),
                           )
                           : const Text(
                             'حفظ التغييرات',
-                            style: TextStyle(fontSize: 14),
+                            style: TextStyle(fontSize: 16),
                           ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
                 ),
