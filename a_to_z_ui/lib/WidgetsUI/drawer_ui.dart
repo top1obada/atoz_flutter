@@ -227,27 +227,8 @@ class BaseDrawer extends StatelessWidget {
               // Payments
               const Divider(),
 
-              // Settings
               ListTile(
-                leading: const Icon(Icons.music_note, color: Colors.grey),
-                title: const Text('الموسيقى', textDirection: TextDirection.rtl),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (_) => ChangeNotifierProvider.value(
-                            value: context.read<PVSong>(),
-                            child: const MusicRadioPage(),
-                          ),
-                    ),
-                  );
-                },
-              ),
-
-              // Help
-              ListTile(
-                leading: const Icon(Icons.place, color: Colors.blueGrey),
+                leading: const Icon(Icons.place, color: Colors.red),
                 title: const Text('موقعي', textDirection: TextDirection.rtl),
                 onTap: () {
                   Navigator.push(
@@ -272,6 +253,25 @@ class BaseDrawer extends StatelessWidget {
                   );
                 },
               ),
+              // Settings
+              ListTile(
+                leading: const Icon(Icons.music_note, color: Colors.grey),
+                title: const Text('الموسيقى', textDirection: TextDirection.rtl),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (_) => ChangeNotifierProvider.value(
+                            value: context.read<PVSong>(),
+                            child: const MusicRadioPage(),
+                          ),
+                    ),
+                  );
+                },
+              ),
+
+              // Help
 
               // Logout
               ListTile(
